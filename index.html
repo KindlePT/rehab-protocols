@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Rehab protocol links</title>
+<style>
+:root{
+  --paper:#F5F8F7;--surface:#FFFFFF;--ink:#17313F;--muted:#56696F;--line:#D3DDDA;
+  --accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;}}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+h1,h2{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0}
+h1{font-size:clamp(26px,5vw,34px)}
+h2{font-size:21px;margin:34px 0 12px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px}
+label:first-child{margin-top:0}
+select,input[type=date],input[type=text]{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.seg button{flex:1;font:inherit;font-weight:600;font-size:14px;border:0;background:transparent;color:var(--muted);padding:8px 10px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button.btn{font:inherit;font-size:15px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
+button.btn.primary,a.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+a.btn{display:inline-block;text-decoration:none;font-size:15px;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 14px}
+button.btn:hover,a.btn:hover{border-color:var(--accent)}
+button.btn:disabled,a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{font-size:14px;color:var(--muted);margin:8px 0 0}
+.hint b{color:var(--ink)}
+.warn{border:1px solid color-mix(in srgb,var(--partial) 55%,var(--line));background:color-mix(in srgb,var(--partial) 12%,var(--surface));border-radius:8px;padding:10px 12px;font-size:14px;margin-top:14px}
+.bad{border-color:color-mix(in srgb,var(--restrict) 55%,var(--line));background:color-mix(in srgb,var(--restrict) 10%,var(--surface))}
+.out{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.protos{display:grid;gap:12px}
+.p{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:start}
+.p .t{font-weight:600}
+.p .n{font-size:14px;color:var(--muted);grid-column:1/-1}
+.badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;border:1px solid;white-space:nowrap}
+.badge.ready{color:var(--clear);border-color:color-mix(in srgb,var(--clear) 55%,transparent)}
+.badge.review{color:var(--partial);border-color:color-mix(in srgb,var(--partial) 55%,transparent)}
+.foot{font-size:13px;color:var(--muted);margin-top:30px;max-width:64ch}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rehab protocol links</h1>
+  <p class="sub">Make a patient link in a few seconds. Pick the protocol, enter the surgery date, and send the link.</p>
+
+  <h2>Patient link maker</h2>
+  <div class="card">
+    <label for="proto">Protocol</label>
+    <select id="proto"></select>
+
+    <label for="sx">Date of surgery</label>
+    <input type="date" id="sx">
+    <p class="hint" id="dateread"></p>
+    <p class="hint">Tap the date and type or pick it. The greyed-out date is not a real entry until you choose one.</p>
+
+    <div id="variants"></div>
+
+    <div id="status" hidden></div>
+
+    <div class="out" id="out">
+      <label for="link" style="margin-top:0">Patient link (surgery date only, no name)</label>
+      <input type="text" id="link" readonly placeholder="Pick a surgery date above to make the link">
+      <div class="row">
+        <button type="button" class="btn primary" id="copy">Copy link</button>
+        <a class="btn" id="preview" target="_blank" rel="noopener">Preview what the patient sees</a>
+        <a class="btn" id="clin" target="_blank" rel="noopener">Open clinician view</a>
+      </div>
+      <p class="hint" id="copied" hidden>Copied.</p>
+    </div>
+  </div>
+
+  <h2>Protocols</h2>
+  <div class="protos" id="protos"></div>
+
+  <p class="foot">Nothing here is stored on a server. The surgery date lives inside each link, so keep your own record of which patient has which date. Don't put names or other identifiers in any file on this site. Send links only for protocols marked ready.</p>
+</div>
+
+<script src="protocols.js"></script>
+<script>
+(function(){
+  var P = window.PROTOCOLS || [];
+  var $ = function(id){return document.getElementById(id)};
+  var esc = function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+  var STATUS = {ready:"Ready to send", review:"Needs source check"};
+  var choice = {};
+  var store = function(k,v){try{v===null?localStorage.removeItem("home-"+k):localStorage.setItem("home-"+k,v)}catch(e){}};
+  var load = function(k){try{return localStorage.getItem("home-"+k)}catch(e){return null}};
+
+  function cur(){var i = +$("proto").value; return P[i] || P[0];}
+  function validDate(s){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    var a = s.split("-").map(Number), d = new Date(a[0],a[1]-1,a[2]);
+    return d.getFullYear()===a[0] && d.getMonth()===a[1]-1 && d.getDate()===a[2] && a[0]>=2000 && a[0]<=2100;
+  }
+  function diffDays(s){
+    var a = s.split("-").map(Number), d = new Date(a[0],a[1]-1,a[2]), t = new Date();
+    t = new Date(t.getFullYear(),t.getMonth(),t.getDate());
+    return Math.round((t-d)/86400000);
+  }
+  function base(file){
+    var u = new URL(file, location.href); u.search = ""; u.hash = ""; return u;
+  }
+  function build(file, withClinician){
+    var u = base(file), sx = $("sx").value;
+    u.searchParams.set("s", sx);
+    (cur().selectors||[]).forEach(function(s){ u.searchParams.set(s.id, choice[s.id] || s.options[0].id); });
+    if(withClinician) u.searchParams.set("c","1");
+    return u.toString();
+  }
+
+  function renderVariants(){
+    var p = cur(), box = $("variants");
+    box.innerHTML = (p.selectors||[]).map(function(s){
+      if(!choice[s.id]) choice[s.id] = s.options[0].id;
+      return '<label>'+esc(s.label)+'</label><div class="seg" role="group" aria-label="'+esc(s.label)+'">'+
+        s.options.map(function(o){return '<button type="button" data-s="'+esc(s.id)+'" data-o="'+esc(o.id)+'" aria-pressed="'+(choice[s.id]===o.id)+'">'+esc(o.label)+'</button>'}).join("")+'</div>';
+    }).join("");
+  }
+
+  function update(){
+    var p = cur(), sx = $("sx").value, ok = validDate(sx);
+    var read = $("dateread"), st = $("status"), out = $("out");
+    $("copied").hidden = true;
+    if(!sx){ read.textContent = "Enter the surgery date from the operative note."; }
+    else if(!ok){ read.textContent = "That date doesn't look right. Use the date picker."; }
+    else {
+      var d = diffDays(sx);
+      read.innerHTML = d < 0 ? "Surgery is <b>"+(-d)+" day"+(-d===1?"":"s")+"</b> from now (before surgery)."
+                             : "Surgery was <b>"+d+" day"+(d===1?"":"s")+" ago</b>, about <b>post-op week "+(Math.floor(d/7)+1)+"</b>. Check that this matches the patient.";
+    }
+    var html = "";
+    if(ok && diffDays(sx) > 365*2) html += '<div class="warn bad">This date is more than 2 years ago. Double-check it.</div>';
+    if(p.status !== "ready") html += '<div class="warn"><b>'+esc(STATUS[p.status]||"Not marked ready")+'.</b> '+esc(p.note||"")+' You can still make a link, but don\'t send it to a patient until this is cleared.</div>';
+    st.innerHTML = html; st.hidden = !html;
+    var pv = $("preview"), cl = $("clin");
+    if(!ok){
+      $("link").value = ""; $("copy").disabled = true;
+      [pv,cl].forEach(function(a){ a.removeAttribute("href"); a.setAttribute("aria-disabled","true"); });
+      return;
+    }
+    $("link").value = build(p.file, false);
+    $("copy").disabled = false;
+    pv.href = build(p.file, false); cl.href = build(p.file, true);
+    [pv,cl].forEach(function(a){ a.removeAttribute("aria-disabled"); });
+  }
+
+  function renderProtocols(){
+    $("proto").innerHTML = P.map(function(p,i){return '<option value="'+i+'">'+esc(p.title)+'</option>'}).join("");
+    var saved = load("proto"); if(saved !== null && P[+saved]) $("proto").value = saved;
+    $("protos").innerHTML = P.map(function(p){
+      return '<div class="card p"><div class="t">'+esc(p.title)+'</div><span class="badge '+esc(p.status)+'">'+esc(STATUS[p.status]||p.status)+'</span>'+
+        (p.note?'<div class="n">'+esc(p.note)+'</div>':'')+
+        '<div style="grid-column:1/-1"><a class="btn" href="'+esc(p.file)+'">Open clinician view</a></div></div>';
+    }).join("");
+  }
+
+  $("proto").addEventListener("change", function(){ store("proto", $("proto").value); renderVariants(); update(); });
+  $("sx").addEventListener("input", update);
+  $("sx").addEventListener("change", update);
+  $("sx").addEventListener("keyup", update);
+  $("sx").addEventListener("blur", update);
+  document.addEventListener("click", function(e){
+    var b = e.target.closest && e.target.closest("[data-s]");
+    if(b){ choice[b.dataset.s] = b.dataset.o; renderVariants(); update(); return; }
+    if(e.target.id === "copy"){
+      var v = $("link").value, done = function(){ $("copied").hidden = false; };
+      try{ navigator.clipboard.writeText(v).then(done, function(){ $("link").select(); done(); }); }
+      catch(err){ $("link").select(); try{document.execCommand("copy")}catch(x){} done(); }
+    }
+  });
+
+  renderProtocols(); renderVariants(); update();
+  window.__homeReady = true;
+})();
+</script>
+</body>
+</html>
