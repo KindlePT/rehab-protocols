@@ -31,5 +31,18 @@ window.PROTOCOLS = [
           { id: "single", label: "Single" },
           { id: "multiple", label: "Multiple" } ] }
     ]
+  },
+  {
+    file: "meniscus.html",
+    title: "Meniscus repair and transplant (Noyes chart)",
+    area: "Knee",
+    status: "review",
+    note: "Return-to-run and sport criteria are not in the chart. Add your own, and confirm brace and early motion limits with the surgeon.",
+    selectors: [
+      { id: "repair", label: "Procedure", options: [
+          { id: "pr", label: "Peripheral repair" },
+          { id: "cx", label: "Complex repair (inside-out)" },
+          { id: "tx", label: "Transplant" } ] }
+    ]
   }
 ];
