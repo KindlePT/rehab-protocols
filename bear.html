@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BEAR implant with complex meniscus repair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Clinical tracker design system shared by every protocol page: header + date box, today's limits,
+   restriction lanes, phase accordion, key dates, plus a one-page patient snapshot. */
+:root{
+  --paper:#F5F8F7;--surface:#FFFFFF;--ink:#17313F;--muted:#56696F;--line:#D3DDDA;
+  --accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(26px,4.2vw,36px);letter-spacing:-.01em;max-width:24ch}
+h2{font-size:22px;margin:40px 0 14px}
+h3{font-size:17px;margin:18px 0 8px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:64ch}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:600}
+input[type=date],input[type=text]{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:20px}
+.controls{display:grid;gap:10px;min-width:250px}
+.datebox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.datebox label,.selbox .lab{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.weekread{font-size:14px;margin-top:8px;color:var(--muted);font-variant-numeric:tabular-nums}
+.weekread b{color:var(--ink);font-weight:600}
+.example{font-size:12px;color:var(--partial);margin-top:6px}
+.segctl{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.segctl button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:6px 10px;border-radius:999px}
+.segctl button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.modebar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+.banner{margin-top:16px;border:1px solid color-mix(in srgb,var(--hold) 45%,var(--line));background:color-mix(in srgb,var(--hold) 10%,var(--surface));border-radius:10px;padding:12px 16px;font-size:14.5px}
+
+.todayhead{margin-top:24px;font-size:15px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.todayhead b{color:var(--ink);font-weight:600}
+.todayhead .ph-name{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600}
+.today{margin-top:12px;display:grid;grid-template-columns:repeat(var(--cols,auto-fit),minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.today > div{background:var(--surface);padding:14px 16px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)}
+.today .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.today .v{font-size:16px;font-weight:500;margin-top:2px}
+.v.r{color:var(--restrict)}.v.p{color:var(--partial)}.v.c{color:var(--clear)}.v.h{color:var(--hold)}
+.nextup{margin-top:10px;font-size:14px;color:var(--muted)}
+.nextup b{color:var(--ink);font-weight:600}
+
+.ov{border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 7%,var(--surface));border-radius:8px;padding:10px 14px;margin:14px 0}
+.ov .t{font-size:13px;font-weight:600;color:var(--restrict);margin-bottom:4px}
+.ov ul{font-size:14px}
+.ov.note{border-color:color-mix(in srgb,var(--hold) 40%,var(--line));background:color-mix(in srgb,var(--hold) 7%,var(--surface))}
+.ov.note .t{color:var(--hold)}
+.cal{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:0 8px 8px 0;padding:8px 14px;margin:14px 0;font-size:14px}
+
+.tl{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px 12px}
+.lane{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;margin-bottom:8px}
+.lane .ln{font-size:13px;color:var(--muted)}
+.bar{position:relative;height:30px}
+.seg{position:absolute;top:0;bottom:0;border-left:3px solid;font-size:12px;padding:0 6px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;color:var(--ink)}
+.seg.r{border-color:var(--restrict);background:color-mix(in srgb,var(--restrict) 20%,var(--surface))}
+.seg.p{border-color:var(--partial);background:color-mix(in srgb,var(--partial) 22%,var(--surface))}
+.seg.c{border-color:var(--clear);background:color-mix(in srgb,var(--clear) 18%,var(--surface))}
+.seg.h{border-color:var(--hold);background:color-mix(in srgb,var(--hold) 16%,var(--surface))}
+.nowline{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--accent);z-index:2;pointer-events:none}
+.nowlabel{position:relative;height:20px;margin-left:132px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.nowlabel span{position:absolute;white-space:nowrap}
+.ticks{position:relative;height:22px;margin-left:132px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span.last{transform:translateX(-100%)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:10px 0 0 132px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+
+details.ph{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+details.ph[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+details.ph.current{box-shadow:inset 4px 0 0 var(--accent)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px}
+summary::-webkit-details-marker{display:none}
+.pn{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent);text-align:center}
+.pt{font-weight:600}
+.pw{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.chip.now{color:var(--accent);border-color:var(--accent);font-weight:600}
+.chip.done{color:var(--clear);border-color:color-mix(in srgb,var(--clear) 50%,transparent)}
+.chip.up{color:var(--muted);border-color:var(--line)}
+.body{padding:0 16px 18px 80px}
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;margin:4px 0 18px}
+.limits > div{border-top:2px solid var(--line);padding-top:8px;min-width:0}
+.limits > div.r{border-color:var(--restrict)}.limits > div.p{border-color:var(--partial)}.limits > div.c{border-color:var(--clear)}.limits > div.h{border-color:var(--hold)}
+.limits .k{font-size:12px;color:var(--muted)}
+.limits .v{font-size:14px;font-weight:500}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0;max-width:74ch}
+.grp{margin-bottom:12px}
+.grp b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.grp ul{font-size:15px}
+.crit{list-style:none;padding:0}
+.crit li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.crit li:last-child{border-bottom:0}
+.crit input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:none}
+.crit label{cursor:pointer}
+.crit input:checked + label{color:var(--muted);text-decoration:line-through}
+.progress{font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--sans);font-weight:400}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--muted)}
+td.d{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr.past td{color:var(--muted)}
+tr.soon td.s{color:var(--accent);font-weight:600}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.cards > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.cards h3{margin:0 0 8px;font-size:16px}
+.cards ul{font-size:14px}
+.flags{margin-top:38px;background:color-mix(in srgb,var(--restrict) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--restrict) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.flags h2{margin:0 0 8px;color:var(--restrict);font-size:19px}
+.flags ul{font-size:14.5px}
+.review{margin-top:38px;background:color-mix(in srgb,var(--hold) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--hold) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.review h2{margin:0 0 4px;color:var(--hold);font-size:19px}
+.review p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.review ul{font-size:14.5px}
+.foot{font-size:13px;color:var(--muted);margin-top:28px;max-width:76ch}
+
+/* ---------- Patient snapshot ---------- */
+#snapshot{max-width:820px;margin:0 auto;padding:24px 20px 60px}
+.sn-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.sn-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;align-items:flex-end;border-bottom:2px solid var(--accent);padding-bottom:12px}
+.sn-top h1{font-size:clamp(22px,4vw,30px);max-width:none}
+.sn-top .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sn-meta{font-size:14px;color:var(--muted);text-align:right;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sn-meta b{color:var(--ink)}
+.sn-name{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;color:var(--muted)}
+.sn-name input{max-width:320px}
+.steps{display:flex;gap:4px;margin:18px 0 6px}
+.steps .s{flex:1;min-width:0}
+.steps .s .b{height:8px;border-radius:99px;background:var(--line)}
+.steps .s.done .b{background:var(--clear)}
+.steps .s.cur .b{background:var(--accent);height:12px;margin-top:-2px}
+.steps .s .l{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.steps .s.cur .l{color:var(--ink);font-weight:600}
+.sn-where{margin-top:14px}
+.sn-where .ph{font-family:var(--serif);font-size:24px;font-weight:600}
+.sn-where .when{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sn-where p{margin:6px 0 0;font-size:16px;max-width:64ch}
+.sn-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:14px}
+.sn-nums > div{background:var(--paper);padding:10px 12px}
+.sn-nums .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sn-nums .v{font-size:15px;font-weight:600;margin-top:2px}
+.sn-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}
+.sn-box{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sn-box h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+.sn-box.do{border-top:3px solid var(--clear)}
+.sn-box.avoid{border-top:3px solid var(--restrict)}
+.sn-box.goals{border-top:3px solid var(--accent)}
+.sn-box.next{border-top:3px solid var(--partial)}
+.sn-box ul{font-size:14.5px}
+.sn-goals{list-style:none;padding:0}
+.sn-goals li{display:flex;gap:9px;align-items:flex-start}
+.sn-goals input{width:17px;height:17px;margin-top:3px;accent-color:var(--accent);flex:none}
+.sn-call{margin-top:16px;border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 6%,var(--surface));border-radius:10px;padding:12px 14px}
+.sn-call h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600;color:var(--restrict)}
+.sn-call ul{font-size:14px}
+.sn-foot{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px;margin-top:16px;font-size:13px;color:var(--muted)}
+.sn-foot label{display:block;margin-bottom:2px}
+.sn-disc{font-size:12px;color:var(--muted);margin-top:14px}
+
+@media (max-width:640px){
+  header{grid-template-columns:1fr}
+  .controls{min-width:0}
+  .lane{grid-template-columns:1fr;gap:4px}
+  .ticks,.legend,.nowlabel{margin-left:0}
+  .body{padding:0 14px 16px 14px}
+  summary{grid-template-columns:40px minmax(0,1fr)}
+  summary .chip{grid-column:2;justify-self:start}
+  .seg{font-size:11px;padding:0 3px}
+  .sn-meta{text-align:left;margin-left:0;white-space:normal}
+  .today{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .steps .s .l{display:none}
+  .steps .s.cur .l{display:block}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+@media print{
+  @page{size:letter;margin:.5in}
+  :root:root:root{--paper:#fff;--surface:#fff;--ink:#111;--muted:#444;--line:#cfd6d4;--accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;color-scheme:light}
+  html,body{background:#fff;color:#111;font-size:12.5px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .noprint,.modebar,.controls .selbox,.tools,.example{display:none!important}
+  body.snap #clinician{display:none!important}
+  body:not(.snap) #snapshot{display:none!important}
+  details.ph{break-inside:avoid-page}
+  #snapshot{padding:0;max-width:none}
+  .sn-card{border:0;padding:0}
+  .sn-name input,.sn-foot input{border:0;border-bottom:1px solid #999;border-radius:0;padding:2px 0;background:transparent}
+  /* one-page snapshot: tighten spacing, keep the content */
+  #snapshot{font-size:11.5px;line-height:1.4}
+  .sn-top{padding-bottom:8px}
+  .sn-top h1{font-size:21px}
+  .sn-name{margin-top:8px;font-size:12px}
+  .steps{margin:10px 0 2px}
+  .steps .s .l{font-size:9px}
+  .sn-where{margin-top:8px}
+  .sn-where .ph{font-size:18px}
+  .sn-where .when{margin-bottom:2px;font-size:11px}
+  .sn-where p{font-size:12px;margin-top:2px}
+  .sn-nums{margin-top:8px}
+  .sn-nums > div{padding:6px 9px}
+  .sn-nums .v{font-size:12.5px}
+  .sn-two{gap:10px;margin-top:10px}
+  .sn-box{padding:8px 10px}
+  .sn-box h3{font-size:12.5px;margin-bottom:3px}
+  .sn-box ul,.sn-call ul{font-size:11.5px}
+  .sn-box li,.sn-call li{margin:1px 0}
+  .sn-call{margin-top:10px;padding:8px 10px}
+  .sn-call h3{font-size:12.5px;margin-bottom:3px}
+  .sn-foot{margin-top:10px;gap:8px 12px;font-size:11px}
+  .sn-disc{margin-top:8px;font-size:10px}
+  .sn-box,.sn-call,.sn-nums{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div id="clinician">
+<div class="wrap">
+<header>
+  <div>
+    <h1 id="title"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="modebar noprint">
+      <button type="button" class="primary" id="openSnap">Patient snapshot</button>
+      <button type="button" id="linkBtn">Copy patient link</button>
+      <div id="linkBox" hidden style="flex-basis:100%;margin-top:8px"></div>
+      <button type="button" id="printClin">Print protocol</button>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="datebox">
+      <label for="sx">Date of surgery</label>
+      <input type="date" id="sx">
+      <div class="weekread" id="weekread"></div>
+      <div class="example" id="example" hidden>Example date shown. Enter the patient's surgery date.</div>
+    </div>
+    <div id="selectors"></div>
+  </div>
+</header>
+
+<div id="banners"></div>
+<div class="todayhead" id="todayhead"></div>
+<div class="today" id="today"></div>
+<div class="nextup" id="nextup"></div>
+<div id="standing"></div>
+
+<h2>Restriction timeline</h2>
+<div class="tl">
+  <div class="nowlabel" id="nowlabel"></div>
+  <div id="lanes"></div>
+  <div class="ticks" id="ticks"></div>
+  <div class="legend">
+    <span><i style="background:var(--restrict)"></i>Protected</span>
+    <span><i style="background:var(--partial)"></i>Progressing</span>
+    <span><i style="background:var(--clear)"></i>Cleared with criteria</span>
+    <span><i style="background:var(--hold)"></i>Not yet</span>
+  </div>
+</div>
+
+<h2>Phases</h2>
+<div class="tools">
+  <button type="button" id="expand">Expand all</button>
+  <button type="button" id="collapse">Collapse all</button>
+  <button type="button" id="reset">Clear checkboxes</button>
+</div>
+<div id="phases" style="margin-top:12px"></div>
+
+<div id="keydates-wrap">
+  <h2>Key dates</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Milestone</th><th>Protocol timing</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody id="dates"></tbody>
+  </table></div>
+</div>
+
+<div id="extras"></div>
+<section class="flags" id="flags" hidden><h2>When to call the surgeon</h2><ul id="flagsList"></ul></section>
+<section class="review" id="review" hidden>
+  <h2>Clinician review flags</h2>
+  <p>Places where the evidence is thin, sources disagree, or surgeon preference varies. Decide these before relying on the page.</p>
+  <ul id="reviewList"></ul>
+</section>
+<p class="foot" id="foot"></p>
+</div>
+</div>
+
+<div id="snapshot" hidden></div>
+
+<script>
+const PROTOCOL = /*PROTOCOL_JSON*/{"id":"bear-meniscus-peds","title":"BEAR implant with complex meniscus repair","subtitle":"Pediatric, open physes. Built from the Miach BEAR protocol (ML-1014 Rev L), with weight bearing, bracing, and flexion limits governed by the Noyes complex inside-out repair column (C and X). Where the two disagree, the more protective rule wins.","spanWeeks":52,"exampleWeek":6,"timeScale":{"breakWeek":12,"breakPct":55},"tickWeeks":[0,2,4,6,8,12,16,22,30,36,52],"limitKeys":[["wb","Weight bearing"],["brace","Brace"],["rom","Range of motion"],["next","Hold or watch"]],"standingPrecautionsTitle":"Rules that hold across phases","standingPrecautions":["The meniscus repair sets weight bearing, brace, and flexion limits. They are stricter than the BEAR timeline alone","No overpressure into flexion at any phase; contact the surgeon before any forced ROM","No kneeling, deep squatting, or loaded tibial rotation until cleared","No resisted hamstring curls early; no CPM"],"lanes":[{"name":"Weight bearing","segs":[[0,4,"r","Toe-touch to 25%"],[4,6,"p","50–75%"],[6,8,"p","75→100%, wean"],[8,52,"c","Full"]]},{"name":"Brace","segs":[[0,2,"r","Locked 0° always"],[2,4,"r","0° walking/sleep"],[4,6,"p","Walking only"],[6,14,"c","Functional if req."],[14,52,"c","Per surgeon"]]},{"name":"Flexion limit","segs":[[0,2,"r","0–45° w/ OK"],[2,4,"r","0–90°"],[4,6,"p","→120°"],[6,8,"p","→135°"],[8,52,"c","Full, no overpressure"]]},{"name":"Loaded flexion","segs":[[0,6,"h","WB-limited"],[6,12,"r","≤70°"],[12,16,"p","≤90°"],[16,52,"c","Progress depth"]]},{"name":"Running / agility","segs":[[0,22,"h","No running"],[22,30,"p","Straight line"],[30,36,"p","Cutting 50–75%"],[36,52,"c","Sport"]]}],"phases":[{"key":"p0","num":"0","name":"Prehab","range":"Before surgery","start":-1,"end":0,"limits":{"wb":["c","Per injury status"],"brace":["c","As prescribed"],"rom":["c","Restore full extension"],"next":["p","Teach toe-touch crutch gait"]},"goals":["Full active and passive knee extension","Flexion within 10° of uninvolved limb","Trace to zero effusion","SLR without extensor lag","Quad index ≥80% (record values for post-op comparison)"],"groups":[["Education",["Teach toe-touch crutch gait now, not WBAT. The meniscus repair overrides the BEAR open-physes WBAT allowance","Brace donning, locking at 0°, and sleep positioning","Home program: quad sets, SLR, heel prop, patellar mobs, ankle pumps","Expected timeline: return to sport 9–12 months; reinforce compliance with both parent and patient"]],["Baseline testing",["Dynamometry: bilateral quad and hamstring peak torque (store for QI denominator)","Effusion (stroke test), ROM, IKDC"]]],"criteria":["Full extension restored","Effusion trace or less","Home exercises demonstrated by patient and parent","Toe-touch crutch gait independent, including stairs"],"patient":{"title":"Getting ready for surgery","short":"Prep","summary":"Before surgery we get your knee as straight and strong as we can and teach you the crutch and brace skills you will need. Practice now makes the first weeks much easier.","numbers":[["Knee straightening","Work toward fully straight"],["Crutches","Practice toes-down walking"],["Brace","Learn to lock and unlock it"],["Home exercises","Learn them now"]],"do":["Practice walking on crutches, touching only your toes down for balance","Practice putting on the brace and locking it straight","Do your thigh squeezes, straight leg raises, and heel props","Bring a parent or helper to your teaching visit"],"avoid":["Walking without crutches if your surgeon or therapist told you to use them","Letting your knee rest in a bent position"],"goals":["Your knee straightens all the way","Little or no swelling","You can do your home exercises correctly","You can walk on crutches with only your toes down, including stairs"],"next":"After surgery your knee is fully protected for the first 2 weeks. All dates are targets that depend on how you are doing."}},{"key":"p1a","num":"1A","name":"Maximum protection","range":"Weeks 0–2","start":0,"end":2,"limits":{"wb":["r","Toe-touch to 25% BW, two crutches"],"brace":["r","Locked 0° at all times incl. sleep"],"rom":["r","Immobilized; supervised 0–45° only with surgeon OK"],"next":["r","No CPM, no active hamstring loading"]},"goals":["Quad activation with superior patellar glide","Control pain and effusion","Full passive extension","Protect the BEAR scaffold and meniscus repair"],"groups":[["Quad activation",["Quad sets with superior patellar glide, 3×10, 2–3×/day","SLR in locked brace only when no lag; if lag, NMES first","NMES: full extension on table, amplitude to full tetanic contraction with visible superior glide, then to max tolerance; 10–15 × 10 s on / 50 s off; distal electrode center-medial, proximal center-lateral"]],["Extension and mobility",["Heel prop, low load long duration (~5 min)","Patellar mobs: medial/lateral, superior/inferior","Ankle pumps"]],["Effusion control",["Cold with compression and elevation every waking hour × 15 min until acute inflammation controlled, then 3×/day","Fabric layer between skin and device; never sleep with the device running"]],["Other",["Hip abduction and extension in side-lying/prone with brace locked","Upper body ergometer for conditioning"]]],"criteria":["Quad set with visible superior patellar glide","Full passive extension","Effusion controlled","Toe-touch gait maintained at home (parent confirms)"],"patient":{"title":"Protect the repairs, wake up the thigh muscle","short":"Protect","summary":"Your knee is in its most protected stage because two repairs are healing at once. The brace and crutches keep stress off both.","numbers":[["Weight on the leg","Toes down only, about 25% or less"],["Brace","Locked straight, even in bed"],["Knee bending","Only if your surgeon allows"],["Crutches","Two crutches every step"]],"do":["Squeeze your thigh muscle and slide your kneecap up: 3 sets of 10, 2 to 3 times a day","Do straight leg raises only if your therapist cleared them and your knee stays straight, with the brace locked","Prop your heel up so the knee rests straight, about 5 minutes at a time","Use cold, squeezing, and elevation as taught, every waking hour at first","Do ankle pumps often","Keep the brace locked and use two crutches"],"avoid":["Putting more than your toes down on the leg","Unlocking the brace","Bending your knee unless your surgeon says it is okay","Pulling your heel toward you against any weight","Falling asleep with the cold or compression device running"],"goals":["Your thigh muscle tightens and your kneecap glides up","Your knee straightens all the way with help","Swelling stays under control","You follow the toes-down rule at home"],"next":"Weeks 2 to 4 add careful bending up to 90°. Weight rules stay the same. All dates are targets that depend on how you are doing."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["BEAR open-physes WBAT is replaced by toe-touch to 25% (Noyes C, weeks 1–2)","No CPM per BEAR","No hamstring curls or resisted knee flexion"]}]},{"key":"p1b","num":"1B","name":"Protected motion","range":"Weeks 2–4","start":2,"end":4,"limits":{"wb":["r","Toe-touch to 25% BW, two crutches"],"brace":["r","Locked 0° walking and sleep; 0–90° seated/ROM"],"rom":["r","0–90° cap, no overpressure"],"next":["r","No unlocked gait training yet"]},"goals":["Flexion to 90° by end of week 4","Maintain full extension","SLR without lag","Continue effusion control"],"groups":[["Range of motion",["Wall slides for extension ~4–5 min, 2×/day","Wall slides/heel slides for flexion within 0–90°: 1–2 × 10 with 5–10 s hold, 2×/day","Patellar mobs all directions; monitor effusion response"]],["Quad and hip",["Quad sets, SLR (flexion, abduction, adduction, extension) without lag","NMES continues","Long arc quad 90→0°, unresisted"]],["Ankle and conditioning",["Banded ankle plantarflexion in long sitting","Upper body ergometer"]]],"criteria":["Flexion 90°","Full extension","SLR × 20 without lag","Surgeon clearance at post-op visit to advance to 50% WB"],"patient":{"title":"Protected motion","short":"Motion","summary":"You start bending your knee in a safe range while weight on the leg stays limited. The goals are a bend of 90°, about a right angle, and a knee that stays fully straight.","numbers":[["Weight on the leg","Toes down only, about 25% or less"],["Brace","Locked straight to walk and sleep"],["Knee bending","Up to 90°, about a right angle"],["Pushing into the bend","No forcing or pressing"]],"do":["Do wall slides to straighten your knee, about 4 to 5 minutes, twice a day","Do wall slides and heel slides to bend, 1 to 2 sets of 10 with a 5 to 10 second hold, twice a day","Gently move your kneecap in all directions","Do straight leg raises in all four directions with no sagging of the knee","Keep using two crutches, with the brace locked for walking"],"avoid":["Bending past 90°","Pushing or pressing to force more bend","Putting more than your toes down on the leg","Walking with the brace unlocked"],"goals":["Bend your knee to 90°","Your knee stays fully straight","20 straight leg raises with no sagging","Your surgeon clears you to put more weight on the leg"],"next":"Weeks 4 to 6 add more weight on the leg, about half to three-quarters of your weight with crutches, if your surgeon agrees. All dates are targets."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["BEAR peds allows ROM as tolerated after week 2 and gait training with brace unlocked at PT. Both are held: flexion capped at 90° and weight bearing stays toe-touch to 25% through week 4 (Noyes C)"]}]},{"key":"p2a","num":"2A","name":"Partial weight bearing","range":"Weeks 4–6","start":4,"end":6,"limits":{"wb":["p","50–75% BW, two crutches"],"brace":["p","On for walking; unlock only with good quad control. Off for sleep"],"rom":["p","Goal 0–120° by week 6"],"next":["r","No stairs, step-ups, or single-leg work"]},"goals":["Flexion 110–120°","Full extension","Good quad isometric contraction","Minimize pain and effusion"],"groups":[["Range of motion",["Heel prop and light bag hang (minimize co-contraction)","AAROM wall slides and heel slides","Bike rocking-for-range, high seat; no full revolutions until ~110°"]],["Quad",["Quad sets emphasizing whole-muscle activation","SLR without lag","Long arc quad 90→0°","NMES until QI ≥80%"]],["Closed chain within the WB limit",["Weight shifts at 50–75% with crutches","Bilateral mini-squats 0–30° with UE support","Standing TKE with band","Bilateral heel raises with UE support"]],["Hip",["Side-lying and standing hip abduction, extension"]]],"criteria":["Full extension","Flexion ≥110°","No extensor lag","Effusion minimal","Surgeon and PT clearance to progress toward full WB"],"patient":{"title":"Putting more weight on the leg","short":"Partial","summary":"With your surgeon's okay, you now put more weight on the leg while still using crutches. The repairs are still young, so we move in steps.","numbers":[["Weight on the leg","Half to three-quarters of your weight"],["Crutches","Two crutches"],["Brace","On to walk; your therapist says when to unlock"],["Knee bending","Working toward about 120°"]],"do":["Practice shifting weight onto the leg with your crutches, 50 to 75%","Use heel props and a light leg hang to straighten the knee","Slide your heel to bend; rock the bike pedals back and forth with a high seat","Squeeze your thigh muscle hard and keep up your straight leg raises","Do shallow mini-squats, no deeper than about 30°, with your hands supported","Do standing heel raises with your hands supported"],"avoid":["Stairs, step-ups, or standing on one leg","Putting more than 75% of your weight on the leg","Pulling your heel toward you against any weight","Forcing the bend. Call your surgeon if bending stalls","Full bike circles before your knee bends about 110°"],"goals":["Your knee straightens all the way","Bend your knee to about 110°","Lift your straight leg with no sagging","Little swelling"],"next":"Weeks 6 to 8 move you toward full weight and off crutches once you meet the walking checklist. All dates are targets."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["BEAR allows WBAT and crutch wean at week 4. Held at 50–75% with crutches (Noyes C, weeks 5–6)","Post-op brace continues for ambulation through week 6 (Noyes C)","No resisted hamstring curls","If flexion stalls: effusion control, patellar mobs, low-load long-duration flexion, bike rocking. Contact surgeon before any forced ROM"]}]},{"key":"p2b","num":"2B","name":"Transition to full weight bearing","range":"Weeks 6–8","start":6,"end":8,"limits":{"wb":["p","75% → 100%, wean crutches"],"brace":["p","Post-op brace off; functional brace if surgeon requires (AROM ≥110°)"],"rom":["p","Goal 0–135° by week 8"],"next":["r","Loaded flexion ≤70°; no running or hopping"]},"goals":["Full weight bearing with normal gait","Flexion 135°","Wean crutches: two → one → none"],"groups":[["Crutch wean criteria (all required)",["Normal heel-toe gait pattern","No pain","No extensor lag","Safe reciprocal stairs without pain or instability"]],["Strength",["Mini-squats and wall sits 0–45°","Step-ups, 4 in. box, once off crutches","Reciprocal stair training once full WB","Bilateral heel raises, TKE, SLR, long arc quad","Hip strengthening"]],["Neuromuscular",["Weight shifts progressing to single-leg stance once full WB"]],["Conditioning",["Stationary bike full revolutions, high seat","Upper body ergometer"]]],"criteria":["Full WB, no crutches, normal gait","Full extension","Flexion ≥135° or within 15° of contralateral","Minimal effusion"],"patient":{"title":"Back to full weight","short":"Weight","summary":"You move from about three-quarters weight to full weight and wean off your crutches. You must walk normally, with no pain and no thigh-muscle lag, before the crutches go.","numbers":[["Weight on the leg","Three-quarters up to full weight"],["Crutches","Two, then one, then none"],["Brace","Hospital brace off; sport brace only if your surgeon says"],["Knee bending","Working toward about 135°"]],"do":["Wean crutches only when your therapist confirms a normal heel-toe step, no pain, and no knee lag","Do wall sits and mini-squats, no deeper than about 45°","Do step-ups on a 4 inch step once you are off crutches","Practice stairs one step at a time once you are at full weight","Ride the stationary bike with full circles and a high seat","Keep strengthening your hips"],"avoid":["Dropping your crutches before you meet the checklist","Stairs and single-leg standing before you are at full weight","Running, hopping, or jumping","Bending the knee under load past about 70°"],"goals":["Walk with no crutches and a normal heel-toe step","Your knee straightens all the way","Bend to about 135°, within 15° of the other knee","Little swelling"],"next":"Weeks 8 to 12 start real strengthening. All dates are targets that depend on how you are doing."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["Full weight bearing reached by week 7–8 per Noyes C, not week 4","Stairs, step-ups, and single-leg stance start only after full WB"]}]},{"key":"p3","num":"3","name":"Post-op strengthening","range":"Weeks 8–12","start":8,"end":12,"limits":{"wb":["c","Full"],"brace":["c","Functional ACL brace for closed-chain work if required"],"rom":["c","Full extension; flexion within 15° of contralateral"],"next":["r","Loaded flexion ≤70°; no running, pivoting, deep squat"]},"goals":["Minimize pain and effusion","Good quad control (≥20 SLR without lag)","Normal gait","Build QI toward 60–80%"],"groups":[["Strength",["Leg press 70–10° arc","Open chain knee extension, progressive resistance, 90–30° arc","Wall sits, mini-squats, shallow lunges ≤70°","Step-up/step-down progression","Romanian deadlifts","Light hamstring curls to 90° from ~week 8","Proximal hip: side-lying abduction/adduction, prone hip extension","Supine quad/hamstring co-contraction"]],["Neuromuscular",["Single-leg squat progression (shallow)","Joint angle repositioning","Single-leg stance on firm then foam"]],["Conditioning",["Bike, pool walking","Aqua jogging from week 8"]],["Modalities",["NMES until QI ≥80%","Low-intensity BFR only if limited by pain or poor load tolerance","Scar massage allowed from phase 3"]]],"criteria":["At least 12 weeks from surgery","20 reps SLR without lag","QI 60–80%","Full WB with normal gait"],"patient":{"title":"Rebuilding strength","short":"Strength","summary":"Your walking is normal and we now build thigh and hip strength. Deep bending under load stays off-limits because the meniscus is still healing.","numbers":[["Weight on the leg","Full"],["Brace","Sport brace for exercise only if required"],["Bending under load","No deeper than about 70°"],["Impact","No running or jumping"]],"do":["Do leg press only within the range your therapist sets, no deeper than about 70°","Do wall sits, mini-squats, and shallow lunges, no deeper than about 70°","Build up step-ups and step-downs slowly","Strengthen your hips with side-lying and face-down leg lifts","Practice balancing on one leg, first on the floor, then on foam","Use the bike or pool walking for conditioning"],"avoid":["Kneeling, deep squatting, or twisting on a planted foot","Bending past about 70° under load","Running, hopping, or jumping","Heavy hamstring work. Light curls start only when your therapist adds them"],"goals":["20 straight leg raises with no sagging","Walk with a normal step","Thigh strength building toward 60 to 80% of the other leg","Little or no swelling"],"next":"Weeks 12 to 20 add heavier strengthening and balance work. Bending under load may go to about 90° around week 16. All dates are targets."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["BEAR lists squats and lunges from week 7; depth held ≤70° under load through week 12 for the meniscus","No kneeling, deep squatting, or loaded tibial rotation"]}]},{"key":"p4","num":"4","name":"Early strengthening","range":"Weeks 12–20","start":12,"end":20,"limits":{"wb":["c","Full"],"brace":["c","Per surgeon"],"rom":["c","Full extension; flexion within 10°"],"next":["h","Loaded flexion ≤90° until ~week 16. No running"]},"goals":["Full extension, flexion within 10° of uninvolved","Progressive overload","Neuromuscular retraining"],"groups":[["Quads",["Step-ups","Leg press and shuttle without jumping; depth past 90° only after ~week 16","PREs on dynamometer, knee extension machine, bag weights"]],["Hamstrings",["Hamstring curls","Resisted back SLR with sport cord"]],["Other musculature",["Standing heel raises, double to single leg","Seated calf press","Multi-hip machine, proximal pad"]],["Neuromuscular",["Wobble board, rocker board, slide board","Single-leg stance, instrumented balance (force plate)"]],["Conditioning",["Bike, elliptical, stair climber","Swimming with flutter kick only (no breaststroke or whip kick)"]]],"criteria":["Full ROM","Minimal effusion and pain","QI ≥80% LSI","At least 20 weeks from surgery"],"patient":{"title":"Heavier strengthening","short":"Build","summary":"Strength work gets heavier and balance training gets harder. Running is still on hold until about week 22.","numbers":[["Bending under load","Up to about 90° until week 16"],["Running","Not yet"],["Brace","Follow your surgeon"],["Knee motion","Straight, with bend close to the other knee"]],"do":["Do step-ups, leg press, and shuttle work without jumping","Use the knee extension machine and hamstring curls as your therapist progresses them","Do heel raises, first on two legs, then on one","Train balance on a wobble board and on one leg","Use the bike, elliptical, or stair climber","Swim with a flutter kick only"],"avoid":["Running or jumping","Bending past about 90° under load before week 16","Breaststroke or whip kick","Kneeling and deep squats"],"goals":["Full knee motion","Little pain or swelling","Thigh strength at least 80% of the other leg at testing","Reach week 20 with your therapist's okay"],"next":"Weeks 20 to 30 may add straight-line running around week 22 if your surgeon clears you. All dates are targets."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["BEAR permits straight-line treadmill running in phase 4 with clearance. Held until ~week 22 (Noyes C, month 6)"]}]},{"key":"p5","num":"5","name":"Strengthening and control","range":"Weeks 20–30","start":20,"end":30,"limits":{"wb":["c","Full"],"brace":["c","Per surgeon"],"rom":["c","Maintain full"],"next":["p","Straight-line running from ~week 22; no cutting"]},"goals":["Maintain full ROM","Running without pain or effusion","Hopping without pain, effusion, or giving way"],"groups":[["Strength",["Progressive overload of prior exercises","Open chain knee extension","Shuttle, sport cord, wall squats","Single-leg squat to 60° without hip IR or knee valgus"]],["Running",["Start ~week 22 only with surgeon clearance, QI ≥80%, trace effusion, full ROM","Treadmill or protected environment; no cutting or pivoting"]],["Agility",["Double-leg jumping progressing to hopping once running is tolerated"]],["Neuromuscular",["Perturbation training, varied surfaces, instrumented testing"]]],"criteria":["Running without increased pain or effusion","Strength and neuromuscular work without difficulty","Single-leg balance 60 s","Vertical hop ≥50% on operated leg (in brace)","Functional hop testing complete, surgeon clearance","At least 30 weeks from surgery","QI ≥80%"],"patient":{"title":"Control and first running","short":"Control","summary":"If your surgeon clears you and you meet the checklist, you may start straight-line running around week 22. Cutting and pivoting are still off-limits.","numbers":[["Running","Straight line only, with clearance"],["Cutting and pivoting","Not yet"],["Hopping","Only after running feels comfortable"],["Strength","Thigh at least 80% of the other leg"]],"do":["Keep up your strength work","Start running only after your surgeon and therapist clear you","Run on a treadmill or other protected surface","Do single-leg squats down to about 60°, keeping your knee over your toes","Train balance on wobble and uneven surfaces","Add two-leg jumping, then hopping, once running feels good"],"avoid":["Cutting, pivoting, or sports","Running before you are cleared","Running through pain or swelling","Single-leg squats where your knee falls inward"],"goals":["Run with no pain or swelling","Stand on one leg for 60 seconds","Hop with no pain or giving way","Finish hop testing and get clearance"],"next":"Weeks 30 to 36 add agility drills at half to three-quarters speed. All dates are targets."},"notes":[{"title":"Meniscus repair changes to the BEAR protocol","tone":"restrict","items":["Running start is the later of BEAR criteria or ~week 22"]}]},{"key":"p6","num":"6","name":"Advanced training","range":"Weeks 30–36","start":30,"end":36,"limits":{"wb":["c","Full"],"brace":["c","Functional brace for testing if required"],"rom":["c","Full"],"next":["p","Cutting and pivot patterns at 50–75%"]},"goals":["Figure-8 and pivot patterns at 75% speed","Jumping without difficulty","Hop tests ≥85% of contralateral"],"groups":[["Strength",["Progressive overload","Plyometrics"]],["Agility",["Shuffling, hopping, cariocas, vertical jumps","Running patterns at 50–75% speed","Sport-specific drills at 50–75% effort"]],["Testing",["Cincinnati hop battery: single, triple, crossover for distance; 6 m timed","Dynamometry quad and hamstring"]]],"criteria":["Maximum vertical jump without pain or instability","Hop tests ≥85% contralateral","Running at 85% speed without difficulty","IKDC Q10 ≥8","Surgeon clearance","QI ≥85%"],"patient":{"title":"Advanced training","short":"Advanced","summary":"You add sport-style movement at controlled speeds, and we test you with hop and strength tests.","numbers":[["Agility drills","About half to three-quarters speed"],["Running","Building toward full speed"],["Hop testing","Goal: at least 85% of the other leg"],["Strength","Goal: at least 85% of the other leg"]],"do":["Do shuffles, carioca, hopping, and vertical jumps","Run patterns at about 50 to 75% speed","Do sport drills at about 50 to 75% effort","Keep up your strength and jump training","Come to hop and strength testing"],"avoid":["Full-speed sport or games","Practice or competition before you are cleared","Pushing through pain, swelling, or giving way"],"goals":["Jump with no pain or giving way","Hop tests at least 85% of the other leg","Run at 85% speed with ease","Your surgeon clears you"],"next":"Weeks 36 to 52 move to sport-specific training and return-to-sport testing. Most people return between 9 and 12 months, and testing, not the calendar, decides."}},{"key":"p7","num":"7","name":"Return to sport","range":"Weeks 36–52","start":36,"end":52,"limits":{"wb":["c","Full"],"brace":["c","Per surgeon"],"rom":["c","Full"],"next":["c","Sport-specific training"]},"goals":["Quad strength ≥90% contralateral","Hop tests ≥90% contralateral","Sport-specific training without pain, effusion, or difficulty"],"groups":[["Sport-specific",["Interval training programs","Sprinting, change of direction","Sport patterns: cutting, pivot and drive, kicking, landing","Skill and biomechanical review with coaches and sports medicine"]],["Return-to-sport testing",["Single-leg balance 60 s without touchdown, each leg","Single-leg hop for distance ≥95% contralateral","QI ≥90%"]]],"criteria":["No functional complaints","Confidence running, cutting, jumping at full speed","Hop tests ≥90% contralateral","QI ≥90%","IKDC Q10 ≥9","Surgeon clearance"],"patient":{"title":"Return to sport","short":"Sport","summary":"Sport-specific training and testing decide when you are ready. Most people return between 9 and 12 months, and your surgeon makes the final call.","numbers":[["Return to sport","Usually 9 to 12 months, after clearance"],["Strength","Goal: at least 90% of the other leg"],["Hop tests","Goal: at least 90 to 95% of the other leg"],["Final say","Your surgeon's clearance"]],"do":["Follow your interval training program","Do sprinting and change-of-direction work as your therapist directs","Practice sport moves: cutting, pivoting, landing","Review your technique with your coaches and therapist"],"avoid":["Full competition before you are cleared","Skipping testing","Playing through pain, swelling, or giving way"],"goals":["No problems with daily activity or sport drills","You feel confident running, cutting, and jumping","Strength and hop tests at least 90% of the other leg","Your surgeon clears you"],"next":"After clearance you return to sport in steps. Keep up your strength and balance work to protect both knees."}}],"keyDates":[{"label":"Advance to 50% weight bearing (surgeon visit)","when":"Week 4","week":4},{"label":"Full weight bearing, crutches weaned","when":"Weeks 7–8","week":8},{"label":"Loaded flexion allowed to 90°","when":"Week 16","week":16},{"label":"Earliest straight-line running (with clearance)","when":"~Week 22","week":22,"patient":"Earliest start of straight-line running, only with clearance"},{"label":"Cutting and pivoting at 50–75%","when":"Weeks 30–36","week":30},{"label":"Return-to-sport testing window","when":"Weeks 36–52","week":36}],"extrasTitle":"Testing and where the sources disagree","extras":[{"title":"Where the protocols disagree","items":["Weight bearing: BEAR WBAT immediately with crutches. Noyes C toe-touch to 25% weeks 1–4, 50–75% weeks 5–6, 100% weeks 7–8. Used: Noyes C","Post-op brace: BEAR locked 0° for ambulation 4 weeks (peds: immobilized 2 weeks). Noyes long-leg brace through week 6. Used: brace for ambulation through week 6, locked 0° weeks 0–4","Early flexion: BEAR peds ROM as tolerated after week 2. Noyes 0–90° weeks 1–4, 0–120° weeks 5–6, 0–135° weeks 7–8. Used: Noyes caps, no overpressure (BEAR)","Stairs, step-ups, single-leg stance: BEAR reciprocal stairs weeks 4–6. Noyes scales closed chain to allowed WB. Used: after full WB (weeks 6–8)","Loaded deep flexion: BEAR squats and lunges from week 7. Noyes leg press 70–10°, knee extension 90–30°. Used: ≤70° to week 12, ≤90° to week 16","Straight-line running: BEAR weeks 12–20 with QI ≥80% and clearance. Noyes month 6 for C. Used: not before ~week 22 plus BEAR criteria","Cutting and pivoting: BEAR phase 6, week 30+. Noyes months 7–12. Used: BEAR week 30+ with criteria","Strength modalities: BEAR NMES, EMG biofeedback, low-intensity BFR only. Noyes not specified. Used: BEAR"]},{"title":"Testing checkpoints","items":["Before surgery: bilateral quad and hamstring peak torque by dynamometry (the QI denominator), effusion, ROM, IKDC","Weeks 8–12: QI 60–80% before leaving NMES; ≥80% to move to resistance work","Week 20: QI ≥80% LSI","Weeks 30–36: Cincinnati hop battery (single, triple, crossover for distance; 6 m timed) ≥85%; QI ≥85%; IKDC Q10 ≥8","Weeks 36+: hop tests ≥90% and single-leg hop for distance ≥95%; QI ≥90%; single-leg balance 60 s each leg; IKDC Q10 ≥9","Instrumented balance on the force plate from weeks 12–20"]}],"reviewFlags":[{"item":"Content converted from the published BEAR + complex meniscus artifact","why":"Numbers come from that artifact. The Miach protocol (ML-1014 Rev L) and the Noyes chart were not re-read this session. Miach's site now lists a 2026 update of the rehab protocol that could not be retrieved here, so re-check weight bearing, brace, and ROM against the current version."},{"item":"Noyes C and X weight-bearing windows","why":"Previously reconstructed from the published complex-repair schedule rather than read from a shared table. Verify against the original chart before using with a patient."},{"item":"No published data on the combined procedure","why":"BEAR plus complex meniscus repair has no published protocol. 'More protective rule wins' is a clinical judgment, not a source finding."},{"item":"Running at ~week 22","why":"Later of Noyes month 6 and BEAR criteria (BEAR allows weeks 12–20). Surgeon preference varies."},{"item":"Patient wording and call list","why":"Plain-language ranges ('about 120°') and the warning-sign list are standard post-op practice, not quoted from either protocol. Reconcile with the surgeon's own patient handout."},{"item":"Pediatric specifics","why":"The original page named an age. It is removed here so the page can be shared. Open-physes allowances in BEAR (WBAT, early ROM) are overridden by the meniscus repair throughout."}],"callSurgeon":["Calf pain, swelling, or warmth, or shortness of breath or chest pain (thromboembolic signs)","Fever, chills, or wound redness, heat, drainage, or opening","New locking, catching, a pop, or giving way","Numbness, or the foot turning pale or blue","Rapidly increasing effusion or loss of extension","Flexion stalls and forcing is being considered (call before any forced ROM)"],"patient":{"title":"Your knee recovery: BEAR implant and meniscus repair","callIf":["Calf pain, swelling, or warmth. Call 911 for chest pain or trouble breathing","Fever, chills, or a wound that is red, hot, leaking, or opening","Your knee locks, catches, pops, or gives way","Numbness, or your foot looks pale or blue","Swelling that suddenly gets worse, or you cannot straighten your knee as you could before"]},"sources":[{"title":"Miach Orthopaedics BEAR Implant Rehabilitation Protocol","url":"https://miachortho.com/healthcare-professionals/rehabilitation-protocol","note":"Rev L cited in the source artifact; the site now lists a 2026 update that could not be retrieved here"},{"title":"Noyes complex inside-out meniscus repair protocol, C and X columns","note":"Cited in the source artifact; chart not re-read this session"}]}/*END_PROTOCOL_JSON*/;
+
+(function(){
+const P=PROTOCOL, DAY=86400000, SPAN=P.spanWeeks, SEL=P.selectors||[];
+const BRK=(P.timeScale&&P.timeScale.breakWeek)||12, BRKP=(P.timeScale&&P.timeScale.breakPct)||55;
+const PFX=(P.id||"protocol")+"-";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function store(k,v){try{v===null?localStorage.removeItem(PFX+k):localStorage.setItem(PFX+k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(PFX+k)}catch(e){return null}}
+
+/* ---------- link parameters: ?s=YYYY-MM-DD&<selectorId>=<optionId> opens the patient view; add &c=1 for the clinician view ---------- */
+const QS=(function(){try{return new URLSearchParams(location.search||location.hash.replace(/^#/,""))}catch(e){return new URLSearchParams("")}})();
+const LINK_DATE=(function(){const s=QS.get("s");if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const a=s.split("-").map(Number),d=new Date(a[0],a[1]-1,a[2]);return d.getFullYear()===a[0]&&d.getMonth()===a[1]-1&&d.getDate()===a[2]&&a[0]>=2000&&a[0]<=2100?s:null})();
+const PATIENT_MODE=!!LINK_DATE&&QS.get("c")!=="1";
+
+/* ---------- value resolution: variants (selector keyed) and tiers (week keyed) ---------- */
+const sel={};
+SEL.forEach(s=>{const q=QS.get(s.id),v=load("sel-"+s.id);sel[s.id]=s.options.some(o=>o.id===q)?q:(!PATIENT_MODE&&s.options.some(o=>o.id===v)?v:s.options[0].id)});
+function pick(v,w){
+  if(v==null||typeof v!=="object")return v;
+  if(Array.isArray(v))return v.map(e=>pick(e,w));
+  if(Array.isArray(v.tiers)){let t=v.tiers[0];for(const x of v.tiers){if(w>=x[0])t=x}return pick(t.slice(1),w)}
+  for(const s of SEL){if(v[sel[s.id]]!==undefined)return pick(v[sel[s.id]],w)}
+  if(v["default"]!==undefined)return pick(v["default"],w);
+  return v;
+}
+function T(v,w){const r=pick(v,w);return Array.isArray(r)?r[r.length-1]:r}
+function lim(ph,k,w){const v=pick(ph.limits[k],w);return Array.isArray(v)?v:["c",String(v)]}
+function tierWeeks(ph){const out=[];for(const [k] of P.limitKeys){const v=ph.limits[k];if(v&&v.tiers)v.tiers.forEach(t=>{if(t[0]>ph.start)out.push({w:t[0],txt:t[3]||String(pick(t.slice(1),t[0])[1])})})}return out}
+
+/* ---------- dates ---------- */
+function parseD(s){const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today0(){const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
+function addMonths(d,n){const r=new Date(d);r.setMonth(r.getMonth()+n);return r}
+function diff(a,b){return Math.round((b-a)/DAY)}
+function fmt(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function fmtShort(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+function rel(n){return n===0?"today":n>0?"in "+n+" day"+(n===1?"":"s"):Math.abs(n)+" day"+(n===-1?"":"s")+" ago"}
+function xpos(w){w=Math.max(0,Math.min(SPAN,w));return w<=BRK?w/BRK*BRKP:BRKP+(w-BRK)/(SPAN-BRK)*(100-BRKP)}
+function phaseDate(sx,wk){return addDays(sx,Math.round(wk*7))}
+function wkOf(ph){return ph.start<0?0:ph.start}
+
+const sxEl=$("sx");
+let isExample=false;
+(function(){const saved=LINK_DATE||load("sx");if(saved){sxEl.value=saved}else{sxEl.value=iso(addDays(today0(),-Math.round((P.exampleWeek||6)*7)));isExample=true}})();
+const posts=P.phases.filter(p=>p.start>=0);
+function curPhase(w){return P.phases.find(p=>w>=p.start&&w<p.end)||(w>=SPAN?P.phases[P.phases.length-1]:null)}
+
+/* ---------- static header ---------- */
+document.title=P.title;
+$("title").textContent=P.title;
+$("subtitle").textContent=P.subtitle||"";
+$("foot").innerHTML=(P.sources&&P.sources.length?"Sources: "+P.sources.map(s=>s.url?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>'+(s.note?" ("+esc(s.note)+")":""):esc(s.title)+(s.note?" ("+esc(s.note)+")":"")).join("; ")+". ":"")+
+  "The surgery date, selections, and checkbox progress stay in this browser only. The operating surgeon's post-op orders supersede this page.";
+
+function renderSelectors(){
+  $("selectors").innerHTML=SEL.map(s=>'<div class="datebox selbox"><span class="lab">'+esc(s.label)+'</span><div class="segctl" role="group" aria-label="'+esc(s.label)+'">'+
+    s.options.map(o=>'<button type="button" data-sel="'+esc(s.id)+'" data-opt="'+esc(o.id)+'" aria-pressed="'+(sel[s.id]===o.id)+'">'+esc(o.label)+'</button>').join("")+'</div></div>').join("");
+  const bn=[];
+  SEL.forEach(s=>s.options.forEach(o=>{if(sel[s.id]===o.id&&o.banner)bn.push('<div class="banner"><b>'+esc(o.label)+':</b> '+esc(o.banner)+'</div>')}));
+  $("banners").innerHTML=bn.join("");
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-sel]");if(!b)return;
+  sel[b.dataset.sel]=b.dataset.opt;store("sel-"+b.dataset.sel,b.dataset.opt);renderAll();
+});
+
+/* ---------- clinician view ---------- */
+function renderClinician(){
+  $("example").hidden=!isExample;
+  if(!sxEl.value)return;
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w), show=cur||posts[0];
+
+  $("weekread").innerHTML=d<0?"Surgery <b>"+rel(d)+"</b>":"Post-op day <b>"+d+"</b> · week <b>"+(Math.floor(d/7)+1)+"</b>";
+
+  const th=$("todayhead"),td=$("today"),nx=$("nextup");
+  const selTxt=SEL.map(s=>s.options.find(o=>o.id===sel[s.id]).label.toLowerCase()).join(", ");
+  if(d<0&&!P.phases.some(p=>p.start<0)){th.innerHTML='<span class="ph-name">Pre-op</span><span>Limits below start on the day of surgery</span>';}
+  else{const pp=d<0?P.phases[0]:show;
+    th.innerHTML='<span class="ph-name">Phase '+esc(pp.num)+': '+esc(pp.name)+'</span><span><b>'+esc(pp.range)+'</b>'+(pp.start>=0?' · '+fmtShort(phaseDate(sx,pp.start))+' to '+(pp.end>=SPAN?"discharge":fmtShort(addDays(phaseDate(sx,pp.end),-1))):'')+(selTxt?' · '+esc(selTxt):'')+'</span>';}
+  const lp=d<0&&P.phases[0].start<0?P.phases[0]:show;
+  td.innerHTML=P.limitKeys.map(([k,l])=>{const v=lim(lp,k,ww);return '<div><div class="k">'+esc(l)+'</div><div class="v '+v[0]+'">'+esc(v[1])+'</div></div>'}).join("");
+  const nk=P.limitKeys.length;td.style.setProperty("--cols",nk<=5?nk:(nk%3===0?3:4));
+
+  // next change: next phase start or next tier inside the current phase
+  const ch=[];posts.forEach(p=>{if(p.start>w+1e-9)ch.push({w:p.start,txt:"Phase "+p.num+": "+p.name})});
+  if(cur)tierWeeks(cur).forEach(c=>{if(c.w>w+1e-9)ch.push(c)});
+  ch.sort((a,b)=>a.w-b.w);
+  if(ch.length){const dt=phaseDate(sx,ch[0].w);nx.innerHTML="Next change: <b>"+esc(ch[0].txt)+"</b> on "+fmt(dt)+" ("+rel(diff(t,dt))+")"}else nx.textContent="";
+
+  // standing precautions
+  $("standing").innerHTML=P.standingPrecautions&&P.standingPrecautions.length?'<div class="ov"><div class="t">'+esc(P.standingPrecautionsTitle||"Standing precautions")+'</div><ul>'+P.standingPrecautions.map(i=>'<li>'+esc(T(i,ww))+'</li>').join("")+'</ul></div>':"";
+
+  // lanes
+  const nowX=xpos(ww);
+  $("lanes").innerHTML=P.lanes.map(L=>'<div class="lane"><div class="ln">'+esc(L.name)+'</div><div class="bar">'+
+    L.segs.map(s=>{const a=xpos(s[0]),b=xpos(s[1]),lb=T(s[3],ww);return '<div class="seg '+s[2]+'" style="left:'+a+'%;width:'+(b-a)+'%" title="'+esc(lb)+'">'+esc(lb)+'</div>'}).join("")+
+    (d>=0?'<div class="nowline" style="left:calc('+nowX+'% - 1px)"></div>':'')+'</div></div>').join("");
+  const shift=nowX<8?"0":nowX>92?"-100%":"-50%";
+  $("nowlabel").innerHTML=d<0?"":'<span style="left:'+nowX+'%;transform:translateX('+shift+')">Today · wk '+(Math.floor(d/7)+1)+' ▾</span>';
+  const ticks=P.tickWeeks||[0,2,4,6,8,12,16,26,39,52];
+  $("ticks").innerHTML=ticks.map((k,i)=>'<span class="'+(i===ticks.length-1?"last":"")+'" style="left:'+xpos(k)+'%">'+(P.tickLabels&&P.tickLabels[String(k)]?esc(P.tickLabels[String(k)]):(i===ticks.length-1?k+" wk":k))+'</span>').join("");
+
+  // phases
+  const openSet=new Set([...document.querySelectorAll("details.ph[open]")].map(e=>e.dataset.key));
+  const first=!document.querySelector("details.ph");
+  $("phases").innerHTML=P.phases.map(p=>{
+    const isCur=p===cur&&d>=0, done=w>=p.end&&p.end<SPAN&&d>=0;
+    const chip=isCur?'<span class="chip now">Current</span>':done?'<span class="chip done">Complete</span>':(p.start>=0?'<span class="chip up">Starts '+fmtShort(phaseDate(sx,p.start))+'</span>':'<span class="chip up">Pre-op</span>');
+    const crit=p.criteria.map((c,i)=>{const id="c-"+p.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-k="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(T(c,ww))+'</label></li>'}).join("");
+    const nChecked=p.criteria.filter((c,i)=>load("c-"+p.key+"-"+i)==="1").length;
+    const lw=isCur?ww:wkOf(p);
+    const open=first?isCur:openSet.has(p.key);
+    const lm=P.limitKeys.map(([k,l])=>{const v=lim(p,k,lw);return '<div class="'+v[0]+'"><div class="k">'+esc(l)+'</div><div class="v">'+esc(v[1])+'</div></div>'}).join("");
+    const notes=(p.notes||[]).map(n=>'<div class="ov'+(n.tone==="note"?" note":"")+'"><div class="t">'+esc(n.title)+'</div><ul>'+n.items.map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join("");
+    return '<details class="ph'+(isCur?" current":"")+'" data-key="'+esc(p.key)+'"'+(open?" open":"")+'><summary><div class="pn">'+esc(p.num)+'</div><div><div class="pt">'+esc(p.name)+'</div><div class="pw">'+esc(p.range)+(p.start>=0?' · '+fmtShort(phaseDate(sx,p.start))+(p.end<SPAN?' – '+fmtShort(addDays(phaseDate(sx,p.end),-1)):' onward'):'')+'<span class="progress" data-prog="'+esc(p.key)+'">'+nChecked+'/'+p.criteria.length+' criteria</span></div></div>'+chip+'</summary><div class="body">'+
+      (p.stage?'<p class="pw" style="margin:0 0 10px"><b>'+esc(p.stage.name)+'.</b> '+esc(p.stage.text)+'</p>':'')+
+      '<div class="limits">'+lm+'</div>'+
+      (p.focus?'<p>'+esc(T(p.focus,lw))+'</p>':'')+
+      (p.goals&&p.goals.length?'<h3>Goals</h3><ul>'+p.goals.map(g=>'<li>'+esc(T(g,lw))+'</li>').join("")+'</ul>':'')+
+      (p.groups&&p.groups.length?'<h3>Interventions</h3>'+p.groups.map(g=>'<div class="grp"><b>'+esc(g[0])+'</b><ul>'+g[1].map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join(""):'')+
+      notes+
+      (p.callout?'<p class="cal">'+esc(p.callout)+'</p>':'')+
+      '<h3>'+esc(p.gateTitle||"Criteria to progress")+'</h3><ul class="crit">'+crit+'</ul></div></details>'}).join("");
+
+  // key dates
+  const kd=P.keyDates||[];
+  $("keydates-wrap").hidden=!kd.length;
+  $("dates").innerHTML=kd.map(r=>{const dt=r.months!=null?addMonths(sx,r.months):phaseDate(sx,r.week);const n=diff(t,dt);const cls=n<0?"past":n<=14?"soon":"";
+    return '<tr class="'+cls+'"><td>'+esc(r.label)+'</td><td>'+esc(r.when)+'</td><td class="d">'+fmt(dt)+'</td><td class="s d">'+(n<0?"Done":rel(n))+'</td></tr>'}).join("");
+
+  // extras, flags, review
+  $("extras").innerHTML=P.extras&&P.extras.length?'<h2>'+esc(P.extrasTitle||"Testing, manual therapy, discharge")+'</h2><div class="cards">'+P.extras.map(c=>'<div><h3>'+esc(c.title)+'</h3><ul>'+c.items.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>').join("")+'</div>':"";
+  const fl=P.callSurgeon||[];$("flags").hidden=!fl.length;$("flagsList").innerHTML=fl.map(i=>'<li>'+esc(i)+'</li>').join("");
+  const rv=P.reviewFlags||[];$("review").hidden=!rv.length;$("reviewList").innerHTML=rv.map(r=>'<li><b>'+esc(r.item)+'</b>'+(r.why?' — '+esc(r.why):'')+'</li>').join("");
+}
+
+/* ---------- patient snapshot ---------- */
+function renderSnapshot(){
+  const el=$("snapshot");
+  if(!sxEl.value){el.innerHTML='<div class="sn-card"><p>Enter the date of surgery on the clinician page first.</p><button type="button" id="closeSnap">Back to protocol</button></div>';return}
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w);
+  const ph=d<0?(P.phases.find(p=>p.start<0)||posts[0]):(cur||posts[0]);
+  const pt=ph.patient||{};
+  const idx=posts.indexOf(ph), next=d<0?(P.phases.find(p=>p.start<0)?posts[0]:posts[1]):posts[idx+1];
+  const steps=posts.map((p,i)=>'<div class="s '+(d>=0&&p===ph?"cur":(d>=0&&w>=p.end?"done":""))+'"><div class="b"></div><div class="l">'+esc(p.patient&&p.patient.short||p.name)+'</div></div>').join("");
+  const nums=(pt.numbers||P.limitKeys.map(([k,l])=>[l,lim(ph,k,ww)[1]])).map(n=>'<div><div class="k">'+esc(n[0])+'</div><div class="v">'+esc(T(n[1],ww))+'</div></div>').join("");
+  const sPick=a=>(a||[]).map(i=>T(i,ww));
+  const ul=a=>'<ul>'+sPick(a).map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul>';
+  const goals=sPick(pt.goals).map((g,i)=>{const id="sg-"+ph.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-sg="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(g)+'</label></li>'}).join("");
+  const upcoming=(P.keyDates||[]).filter(k=>k.patient).map(k=>({k,dt:k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week)})).filter(x=>diff(t,x.dt)>=0).sort((a,b)=>a.dt-b.dt)[0];
+  const nextHtml=(next||pt.next)?'<div class="sn-box next"><h3>Coming up next</h3>'+(next?'<p style="margin:0 0 4px"><b>'+esc(next.patient&&next.patient.short||next.name)+'</b> · expected around '+fmt(phaseDate(sx,next.start))+'</p>':'')+(pt.next?'<p style="margin:0;font-size:14.5px">'+esc(T(pt.next,ww))+'</p>':'')+(upcoming&&(!next||upcoming.k.week!==next.start)?'<p style="margin:6px 0 0;font-size:13.5px;color:var(--muted)">Also: '+esc(upcoming.k.patient===true?upcoming.k.label:upcoming.k.patient)+' · '+fmt(upcoming.dt)+'</p>':'')+'</div>':'';
+  const call=(P.patient&&P.patient.callIf)||P.callSurgeon||[];
+  const sv=k=>esc(load("sn-"+k)||"");
+  el.innerHTML=
+   '<div class="noprint modebar" style="margin:0 0 14px;align-items:center"><button type="button" class="primary" id="icsBtn">Add milestones to my calendar</button>'+(PATIENT_MODE?'':'<button type="button" id="closeSnap">← Back to protocol</button>')+(P.allowPrint?'<button type="button" id="printSnap">Print or save as PDF</button>':'')+(PATIENT_MODE?'':'<span class="pw">Need a PDF copy for the patient? Ask Claude for the snapshot and give it the surgery date.</span>')+'</div>'+
+   '<div class="sn-card">'+
+    '<div class="sn-top"><div><div class="kicker">Your recovery snapshot</div><h1>'+esc((P.patient&&P.patient.title)||P.title)+'</h1></div>'+
+    '<div class="sn-meta">As of <b>'+fmt(t)+'</b><br>'+(d<0?'Surgery '+rel(d):'Surgery '+fmt(sx)+' · <b>week '+(Math.floor(d/7)+1)+'</b>')+'</div></div>'+
+    '<div class="sn-name"><label for="sn-name">Name</label><input type="text" id="sn-name" data-sn="name" value="'+sv("name")+'" placeholder="Optional. Stays on this device"></div>'+
+    '<div class="steps" aria-label="Recovery phases">'+steps+'</div>'+
+    '<div class="sn-where"><div class="ph">'+esc(d<0?"Getting ready for surgery":(ph.patient&&ph.patient.title)||ph.name)+'</div><div class="when">'+esc(ph.range)+'</div><p>'+esc(T(pt.summary,ww)||"")+'</p></div>'+
+    '<div class="sn-nums">'+nums+'</div>'+
+    '<div class="sn-two"><div class="sn-box do"><h3>Keep doing</h3>'+ul(pt.do)+'</div><div class="sn-box avoid"><h3>Please avoid for now</h3>'+ul(pt.avoid)+'</div></div>'+
+    '<div class="sn-two"><div class="sn-box goals"><h3>What we are working toward</h3><ul class="sn-goals">'+goals+'</ul></div>'+nextHtml+'</div>'+
+    (call.length?'<div class="sn-call"><h3>Call your surgeon or therapist if</h3><ul>'+call.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>':'')+
+    '<div class="sn-foot"><div><label for="sn-th">Your therapist</label><input type="text" id="sn-th" data-sn="th" value="'+sv("th")+'"></div><div><label for="sn-ph">Clinic phone</label><input type="text" id="sn-ph" data-sn="ph" value="'+sv("ph")+'"></div><div><label for="sn-nv">Next visit</label><input type="text" id="sn-nv" data-sn="nv" value="'+sv("nv")+'"></div></div>'+
+    '<p class="sn-disc">'+esc((P.patient&&P.patient.disclaimer)||"This is a general guide to where you are in your recovery. Your surgeon and therapist may adjust it for you. Their instructions come first.")+'</p>'+
+   '</div>';
+}
+document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.sn;if(k)store("sn-"+k,e.target.value||null)});
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.sg;if(k)store(k,e.target.checked?"1":null)});
+
+/* ---------- mode + wiring ---------- */
+function setMode(snap){document.body.classList.toggle("snap",snap);$("snapshot").hidden=!snap;$("clinician").hidden=snap;if(snap){renderSnapshot();window.scrollTo(0,0)}}
+function doPrint(){try{window.print()}catch(e){}}
+document.addEventListener("click",e=>{
+  const id=e.target.id;
+  if(id==="openSnap")setMode(true);
+  else if(id==="closeSnap")setMode(false);
+  else if(id==="printSnap"||id==="printClin")doPrint();
+});
+sxEl.addEventListener("change",()=>{if(sxEl.value){store("sx",sxEl.value);isExample=false}else{store("sx",null)}renderAll()});
+
+/* ---------- patient link (clinician side) ---------- */
+function patientLink(){
+  if(!sxEl.value||isExample)return"";
+  const q=new URLSearchParams();q.set("s",sxEl.value);SEL.forEach(s=>q.set(s.id,sel[s.id]));
+  return location.origin+location.pathname+"?"+q.toString();
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="linkBtn")return;
+  const box=$("linkBox"),url=patientLink();
+  if(!url){box.hidden=false;box.innerHTML='<span class="pw">Enter the surgery date first.</span>';return}
+  box.hidden=false;
+  box.innerHTML='<label for="linkOut" style="font-size:13px;color:var(--muted)">Patient link (surgery date only, no name)</label><input type="text" id="linkOut" readonly value="'+esc(url)+'" style="width:100%">';
+  const o=$("linkOut");o.focus();o.select();
+  try{navigator.clipboard.writeText(url)}catch(err){}
+});
+
+/* ---------- calendar export (.ics, all-day events, no server) ---------- */
+function icsEscape(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n")}
+function icsDate(d){return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")}
+function buildICS(){
+  const sx=parseD(sxEl.value),t=today0(),ev=[];
+  posts.forEach(p=>{if(p.start>0){const dt=phaseDate(sx,p.start);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery: "+((p.patient&&p.patient.short)||p.name),desc:(p.patient&&T(p.patient.summary,p.start))||""})}});
+  (P.keyDates||[]).filter(k=>k.patient).forEach(k=>{const dt=k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery milestone: "+(k.patient===true?k.label:k.patient),desc:"Target date. It depends on meeting your goals, so check with your therapist."})});
+  const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rehab protocol tracker//EN","CALSCALE:GREGORIAN"];
+  ev.forEach((x,i)=>{const end=addDays(x.dt,1);lines.push("BEGIN:VEVENT","UID:"+(P.id||"protocol")+"-"+icsDate(sx)+"-"+i+"@rehab-tracker","DTSTAMP:"+icsDate(t)+"T000000Z","DTSTART;VALUE=DATE:"+icsDate(x.dt),"DTEND;VALUE=DATE:"+icsDate(end),"SUMMARY:"+icsEscape(x.title),"DESCRIPTION:"+icsEscape(x.desc),"TRANSP:TRANSPARENT","END:VEVENT")});
+  lines.push("END:VCALENDAR");
+  return{text:lines.join("\r\n"),count:ev.length};
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="icsBtn")return;
+  const r=buildICS();
+  if(!r.count){e.target.textContent="No upcoming milestones left";return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([r.text],{type:"text/calendar"}));a.download="recovery-milestones.ics";document.body.appendChild(a);a.click();a.remove();e.target.textContent="Calendar file ready ("+r.count+" events)"}catch(err){e.target.textContent="Download isn't available here"}
+});
+$("phases").addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.k;if(!k)return;
+  store(k,e.target.checked?"1":null);
+  const key=k.split("-")[1],p=P.phases.find(q=>q.key===key);
+  const n=p.criteria.filter((c,i)=>load("c-"+key+"-"+i)==="1").length;
+  const el=document.querySelector('[data-prog="'+key+'"]');if(el)el.textContent=n+"/"+p.criteria.length+" criteria";
+});
+$("expand").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true);
+$("collapse").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=false);
+$("reset").onclick=()=>{P.phases.forEach(p=>p.criteria.forEach((c,i)=>store("c-"+p.key+"-"+i,null)));renderAll()};
+window.addEventListener("beforeprint",()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true));
+
+$("printClin").hidden=!P.allowPrint;
+function renderAll(){renderSelectors();renderClinician();if(document.body.classList.contains("snap"))renderSnapshot()}
+renderAll();
+if(PATIENT_MODE){setMode(true);window.scrollTo(0,0)}
+window.__protocolReady=true;
+})();
+</script>
+</body>
+</html>
