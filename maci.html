@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MACI knee cartilage rehab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Clinical tracker design system shared by every protocol page: header + date box, today's limits,
+   restriction lanes, phase accordion, key dates, plus a one-page patient snapshot. */
+:root{
+  --paper:#F5F8F7;--surface:#FFFFFF;--ink:#17313F;--muted:#56696F;--line:#D3DDDA;
+  --accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(26px,4.2vw,36px);letter-spacing:-.01em;max-width:24ch}
+h2{font-size:22px;margin:40px 0 14px}
+h3{font-size:17px;margin:18px 0 8px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:64ch}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:600}
+input[type=date],input[type=text]{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:20px}
+.controls{display:grid;gap:10px;min-width:250px}
+.datebox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.datebox label,.selbox .lab{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.weekread{font-size:14px;margin-top:8px;color:var(--muted);font-variant-numeric:tabular-nums}
+.weekread b{color:var(--ink);font-weight:600}
+.example{font-size:12px;color:var(--partial);margin-top:6px}
+.segctl{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.segctl button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:6px 10px;border-radius:999px}
+.segctl button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.modebar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+.banner{margin-top:16px;border:1px solid color-mix(in srgb,var(--hold) 45%,var(--line));background:color-mix(in srgb,var(--hold) 10%,var(--surface));border-radius:10px;padding:12px 16px;font-size:14.5px}
+
+.todayhead{margin-top:24px;font-size:15px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.todayhead b{color:var(--ink);font-weight:600}
+.todayhead .ph-name{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600}
+.today{margin-top:12px;display:grid;grid-template-columns:repeat(var(--cols,auto-fit),minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.today > div{background:var(--surface);padding:14px 16px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)}
+.today .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.today .v{font-size:16px;font-weight:500;margin-top:2px}
+.v.r{color:var(--restrict)}.v.p{color:var(--partial)}.v.c{color:var(--clear)}.v.h{color:var(--hold)}
+.nextup{margin-top:10px;font-size:14px;color:var(--muted)}
+.nextup b{color:var(--ink);font-weight:600}
+
+.ov{border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 7%,var(--surface));border-radius:8px;padding:10px 14px;margin:14px 0}
+.ov .t{font-size:13px;font-weight:600;color:var(--restrict);margin-bottom:4px}
+.ov ul{font-size:14px}
+.ov.note{border-color:color-mix(in srgb,var(--hold) 40%,var(--line));background:color-mix(in srgb,var(--hold) 7%,var(--surface))}
+.ov.note .t{color:var(--hold)}
+.cal{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:0 8px 8px 0;padding:8px 14px;margin:14px 0;font-size:14px}
+
+.tl{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px 12px}
+.lane{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;margin-bottom:8px}
+.lane .ln{font-size:13px;color:var(--muted)}
+.bar{position:relative;height:30px}
+.seg{position:absolute;top:0;bottom:0;border-left:3px solid;font-size:12px;padding:0 6px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;color:var(--ink)}
+.seg.r{border-color:var(--restrict);background:color-mix(in srgb,var(--restrict) 20%,var(--surface))}
+.seg.p{border-color:var(--partial);background:color-mix(in srgb,var(--partial) 22%,var(--surface))}
+.seg.c{border-color:var(--clear);background:color-mix(in srgb,var(--clear) 18%,var(--surface))}
+.seg.h{border-color:var(--hold);background:color-mix(in srgb,var(--hold) 16%,var(--surface))}
+.nowline{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--accent);z-index:2;pointer-events:none}
+.nowlabel{position:relative;height:20px;margin-left:132px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.nowlabel span{position:absolute;white-space:nowrap}
+.ticks{position:relative;height:22px;margin-left:132px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span.last{transform:translateX(-100%)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:10px 0 0 132px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+
+details.ph{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+details.ph[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+details.ph.current{box-shadow:inset 4px 0 0 var(--accent)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px}
+summary::-webkit-details-marker{display:none}
+.pn{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent);text-align:center}
+.pt{font-weight:600}
+.pw{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.chip.now{color:var(--accent);border-color:var(--accent);font-weight:600}
+.chip.done{color:var(--clear);border-color:color-mix(in srgb,var(--clear) 50%,transparent)}
+.chip.up{color:var(--muted);border-color:var(--line)}
+.body{padding:0 16px 18px 80px}
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;margin:4px 0 18px}
+.limits > div{border-top:2px solid var(--line);padding-top:8px;min-width:0}
+.limits > div.r{border-color:var(--restrict)}.limits > div.p{border-color:var(--partial)}.limits > div.c{border-color:var(--clear)}.limits > div.h{border-color:var(--hold)}
+.limits .k{font-size:12px;color:var(--muted)}
+.limits .v{font-size:14px;font-weight:500}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0;max-width:74ch}
+.grp{margin-bottom:12px}
+.grp b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.grp ul{font-size:15px}
+.crit{list-style:none;padding:0}
+.crit li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.crit li:last-child{border-bottom:0}
+.crit input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:none}
+.crit label{cursor:pointer}
+.crit input:checked + label{color:var(--muted);text-decoration:line-through}
+.progress{font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--sans);font-weight:400}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--muted)}
+td.d{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr.past td{color:var(--muted)}
+tr.soon td.s{color:var(--accent);font-weight:600}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.cards > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.cards h3{margin:0 0 8px;font-size:16px}
+.cards ul{font-size:14px}
+.flags{margin-top:38px;background:color-mix(in srgb,var(--restrict) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--restrict) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.flags h2{margin:0 0 8px;color:var(--restrict);font-size:19px}
+.flags ul{font-size:14.5px}
+.review{margin-top:38px;background:color-mix(in srgb,var(--hold) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--hold) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.review h2{margin:0 0 4px;color:var(--hold);font-size:19px}
+.review p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.review ul{font-size:14.5px}
+.foot{font-size:13px;color:var(--muted);margin-top:28px;max-width:76ch}
+
+/* ---------- Patient snapshot ---------- */
+#snapshot{max-width:820px;margin:0 auto;padding:24px 20px 60px}
+.sn-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.sn-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;align-items:flex-end;border-bottom:2px solid var(--accent);padding-bottom:12px}
+.sn-top h1{font-size:clamp(22px,4vw,30px);max-width:none}
+.sn-top .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sn-meta{font-size:14px;color:var(--muted);text-align:right;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sn-meta b{color:var(--ink)}
+.sn-name{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;color:var(--muted)}
+.sn-name input{max-width:320px}
+.steps{display:flex;gap:4px;margin:18px 0 6px}
+.steps .s{flex:1;min-width:0}
+.steps .s .b{height:8px;border-radius:99px;background:var(--line)}
+.steps .s.done .b{background:var(--clear)}
+.steps .s.cur .b{background:var(--accent);height:12px;margin-top:-2px}
+.steps .s .l{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.steps .s.cur .l{color:var(--ink);font-weight:600}
+.sn-where{margin-top:14px}
+.sn-where .ph{font-family:var(--serif);font-size:24px;font-weight:600}
+.sn-where .when{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sn-where p{margin:6px 0 0;font-size:16px;max-width:64ch}
+.sn-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:14px}
+.sn-nums > div{background:var(--paper);padding:10px 12px}
+.sn-nums .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sn-nums .v{font-size:15px;font-weight:600;margin-top:2px}
+.sn-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}
+.sn-box{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sn-box h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+.sn-box.do{border-top:3px solid var(--clear)}
+.sn-box.avoid{border-top:3px solid var(--restrict)}
+.sn-box.goals{border-top:3px solid var(--accent)}
+.sn-box.next{border-top:3px solid var(--partial)}
+.sn-box ul{font-size:14.5px}
+.sn-goals{list-style:none;padding:0}
+.sn-goals li{display:flex;gap:9px;align-items:flex-start}
+.sn-goals input{width:17px;height:17px;margin-top:3px;accent-color:var(--accent);flex:none}
+.sn-call{margin-top:16px;border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 6%,var(--surface));border-radius:10px;padding:12px 14px}
+.sn-call h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600;color:var(--restrict)}
+.sn-call ul{font-size:14px}
+.sn-foot{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px;margin-top:16px;font-size:13px;color:var(--muted)}
+.sn-foot label{display:block;margin-bottom:2px}
+.sn-disc{font-size:12px;color:var(--muted);margin-top:14px}
+
+@media (max-width:640px){
+  header{grid-template-columns:1fr}
+  .controls{min-width:0}
+  .lane{grid-template-columns:1fr;gap:4px}
+  .ticks,.legend,.nowlabel{margin-left:0}
+  .body{padding:0 14px 16px 14px}
+  summary{grid-template-columns:40px minmax(0,1fr)}
+  summary .chip{grid-column:2;justify-self:start}
+  .seg{font-size:11px;padding:0 3px}
+  .sn-meta{text-align:left;margin-left:0;white-space:normal}
+  .today{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .steps .s .l{display:none}
+  .steps .s.cur .l{display:block}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+@media print{
+  @page{size:letter;margin:.5in}
+  :root:root:root{--paper:#fff;--surface:#fff;--ink:#111;--muted:#444;--line:#cfd6d4;--accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;color-scheme:light}
+  html,body{background:#fff;color:#111;font-size:12.5px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .noprint,.modebar,.controls .selbox,.tools,.example{display:none!important}
+  body.snap #clinician{display:none!important}
+  body:not(.snap) #snapshot{display:none!important}
+  details.ph{break-inside:avoid-page}
+  #snapshot{padding:0;max-width:none}
+  .sn-card{border:0;padding:0}
+  .sn-name input,.sn-foot input{border:0;border-bottom:1px solid #999;border-radius:0;padding:2px 0;background:transparent}
+  /* one-page snapshot: tighten spacing, keep the content */
+  #snapshot{font-size:11.5px;line-height:1.4}
+  .sn-top{padding-bottom:8px}
+  .sn-top h1{font-size:21px}
+  .sn-name{margin-top:8px;font-size:12px}
+  .steps{margin:10px 0 2px}
+  .steps .s .l{font-size:9px}
+  .sn-where{margin-top:8px}
+  .sn-where .ph{font-size:18px}
+  .sn-where .when{margin-bottom:2px;font-size:11px}
+  .sn-where p{font-size:12px;margin-top:2px}
+  .sn-nums{margin-top:8px}
+  .sn-nums > div{padding:6px 9px}
+  .sn-nums .v{font-size:12.5px}
+  .sn-two{gap:10px;margin-top:10px}
+  .sn-box{padding:8px 10px}
+  .sn-box h3{font-size:12.5px;margin-bottom:3px}
+  .sn-box ul,.sn-call ul{font-size:11.5px}
+  .sn-box li,.sn-call li{margin:1px 0}
+  .sn-call{margin-top:10px;padding:8px 10px}
+  .sn-call h3{font-size:12.5px;margin-bottom:3px}
+  .sn-foot{margin-top:10px;gap:8px 12px;font-size:11px}
+  .sn-disc{margin-top:8px;font-size:10px}
+  .sn-box,.sn-call,.sn-nums{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div id="clinician">
+<div class="wrap">
+<header>
+  <div>
+    <h1 id="title"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="modebar noprint">
+      <button type="button" class="primary" id="openSnap">Patient snapshot</button>
+      <button type="button" id="linkBtn">Copy patient link</button>
+      <div id="linkBox" hidden style="flex-basis:100%;margin-top:8px"></div>
+      <button type="button" id="printClin">Print protocol</button>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="datebox">
+      <label for="sx">Date of surgery</label>
+      <input type="date" id="sx">
+      <div class="weekread" id="weekread"></div>
+      <div class="example" id="example" hidden>Example date shown. Enter the patient's surgery date.</div>
+    </div>
+    <div id="selectors"></div>
+  </div>
+</header>
+
+<div id="banners"></div>
+<div class="todayhead" id="todayhead"></div>
+<div class="today" id="today"></div>
+<div class="nextup" id="nextup"></div>
+<div id="standing"></div>
+
+<h2>Restriction timeline</h2>
+<div class="tl">
+  <div class="nowlabel" id="nowlabel"></div>
+  <div id="lanes"></div>
+  <div class="ticks" id="ticks"></div>
+  <div class="legend">
+    <span><i style="background:var(--restrict)"></i>Protected</span>
+    <span><i style="background:var(--partial)"></i>Progressing</span>
+    <span><i style="background:var(--clear)"></i>Cleared with criteria</span>
+    <span><i style="background:var(--hold)"></i>Not yet</span>
+  </div>
+</div>
+
+<h2>Phases</h2>
+<div class="tools">
+  <button type="button" id="expand">Expand all</button>
+  <button type="button" id="collapse">Collapse all</button>
+  <button type="button" id="reset">Clear checkboxes</button>
+</div>
+<div id="phases" style="margin-top:12px"></div>
+
+<div id="keydates-wrap">
+  <h2>Key dates</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Milestone</th><th>Protocol timing</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody id="dates"></tbody>
+  </table></div>
+</div>
+
+<div id="extras"></div>
+<section class="flags" id="flags" hidden><h2>When to call the surgeon</h2><ul id="flagsList"></ul></section>
+<section class="review" id="review" hidden>
+  <h2>Clinician review flags</h2>
+  <p>Places where the evidence is thin, sources disagree, or surgeon preference varies. Decide these before relying on the page.</p>
+  <ul id="reviewList"></ul>
+</section>
+<p class="foot" id="foot"></p>
+</div>
+</div>
+
+<div id="snapshot" hidden></div>
+
+<script>
+const PROTOCOL = /*PROTOCOL_JSON*/{"id":"maci-knee","title":"MACI knee cartilage rehab","subtitle":"Built from the CI30 MACI tracker, which cites Vericel's MACI Rehabilitation Manual (Ebert, 2018) and the MACI prescribing information (06/2017). Check flexion limits against the current manual (revised February 2021) before using with a patient; see the review flags.","spanWeeks":52,"exampleWeek":5,"timeScale":{"breakWeek":12,"breakPct":55},"tickWeeks":[0,1,3,6,12,26,39,52],"tickLabels":{"12":"3mo","26":"6mo","39":"9mo","52":"12mo"},"limitKeys":[["wb","Weight bearing"],["rom","Flexion limit"],["brace","Brace"],["aids","Aids"]],"selectors":[{"id":"joint","label":"Graft location","options":[{"id":"tf","label":"Tibiofemoral"},{"id":"pf","label":"Patellofemoral"}]},{"id":"defects","label":"Number of defects","options":[{"id":"single","label":"Single"},{"id":"multiple","label":"Multiple","banner":"The manual sets these numbers per joint compartment, not per lesion count, and the numbers here are not split by single versus multiple. Favor the lower end of each phase's weight-bearing and flexion range, and get the surgeon's sign-off before advancing. If the combined defects are uncontained or exceed 10 cm², expect suture-augmented fixation, which may affect early protection."}]}],"standingPrecautionsTitle":"Rules that hold across phases","standingPrecautions":["Brace stays on 24 hours a day for the first 3 weeks, except during CPM or PT","Meniscal pathology, cruciate instability, and malalignment must be addressed before or during implantation. With any concomitant procedure, take the most restrictive limit from the surgeon's written protocol","Avoid shear forces across the knee and active knee extension against resistance early"],"lanes":[{"name":"Weight bearing","segs":[[0,1,"r",{"tf":"<20%","pf":"<20%"}],[1,3,"r",{"tf":"<20→30%","pf":"<20→50%"}],[3,6,"p",{"tf":"<40→60%","pf":"75%→full"}],[6,12,"p",{"tf":"80%→full","pf":"Full"}],[12,26,"c",{"tf":"Full","pf":"Full"}],[26,39,"c",{"tf":"Full","pf":"Full"}],[39,52,"c",{"tf":"Full","pf":"Full"}]]},{"name":"Flexion limit","segs":[[0,1,"r",{"tf":"0→30°","pf":"0→20°"}],[1,3,"r",{"tf":"30→90°","pf":"30→60°"}],[3,6,"p",{"tf":"110→125°","pf":"90→125°"}],[6,12,"p",{"tf":"Full","pf":"Full"}],[12,26,"c",{"tf":"Full","pf":"Full"}],[26,39,"c",{"tf":"Full","pf":"Full"}],[39,52,"c",{"tf":"Full","pf":"Full"}]]},{"name":"Brace","segs":[[0,1,"r",{"tf":"0→30°","pf":"Locked ext."}],[1,3,"r",{"tf":"30→45°","pf":"Locked ext."}],[3,6,"p",{"tf":"45°→ext.","pf":"As req. (wk 6+)"}],[6,12,"p",{"tf":"In brace","pf":"None"}],[12,26,"c",{"tf":"None","pf":"None"}],[26,39,"c",{"tf":"None","pf":"None"}],[39,52,"c",{"tf":"None","pf":"None"}]]},{"name":"Aids","segs":[[0,1,"r",{"tf":"2 crutches","pf":"2 crutches"}],[1,3,"r",{"tf":"2 crutches","pf":"2 crutches"}],[3,6,"p",{"tf":"1–2 crutches","pf":"1–2 crutches"}],[6,12,"p",{"tf":"1 crutch out","pf":"None"}],[12,26,"c",{"tf":"None","pf":"None"}],[26,39,"c",{"tf":"None","pf":"None"}],[39,52,"c",{"tf":"None","pf":"None"}]]}],"phases":[{"key":"p1","num":"1","name":"Immediate post-op","range":"Week 1 (days 0–7)","start":0,"end":1,"stage":{"name":"Implantation and protection","text":"Cells adhere to bone and begin to proliferate through the defect."},"limits":{"wb":{"tf":["r","<20% of body weight"],"pf":["r","<20% of body weight"]},"rom":{"tf":["r","Passive and active, progress 0° to 30°"],"pf":["r","Passive and active, progress 0° to 20°"]},"brace":{"tf":["r","Progress from 0° to 30°"],"pf":["r","Locked at full knee extension"]},"aids":{"tf":["r","2 crutches"],"pf":["r","2 crutches"]}},"focus":"Manage pain and swelling, introduce movement carefully, and protect the implant within the precautions.","groups":[["Start on post-op day 1 (unless the surgeon says otherwise)",["Analgesics for pain control","CPM 12 to 24 h post-op, at least 1 h/day, to reduce adhesions","ROM-control brace on, off only for CPM or PT","Ice 20 min, at least 3 times a day","Ankle pumps for circulation","Isometrics: quads, hamstrings, glutes","Breathing exercises with correct technique","Toe-touch gait on 2 crutches (20% BW), bed transfers, stairs","Written and verbal ADL instruction within precautions"]]],"gateTitle":"Criteria to progress","criteria":["Outpatient PT appointment booked","Knows surgeon follow-up is usually at 4 to 6 weeks","Suture or staple removal scheduled (generally 8 to 10 days)","Understands RICE for edema control","Weight-bearing and brace rules reinforced","Independent and safe with the home exercise program","Independent with stairs, transfers, showering","Can recognize wound and infection changes"],"patient":{"title":"Protect the graft and manage swelling","short":"Protect","summary":"The new cartilage cells are just starting to attach, so this first week is all about protection. The brace and crutches keep stress off the graft.","numbers":[["Weight on the leg","Toes down only, under about 20% of your weight"],["Knee bending",{"tf":"Gently, up to about 30°","pf":"Gently, up to about 20°"}],["Brace",{"tf":"On all the time, except for therapy and your motion machine","pf":"On and locked straight, except for therapy and your motion machine"}],["Crutches","Two crutches for every step"]],"do":["Take your pain medicine as prescribed","Use the motion machine (CPM) as instructed, at least 1 hour a day","Ice for 20 minutes, at least 3 times a day","Do ankle pumps often","Tighten your thigh and buttock muscles without moving your knee","Practice crutch walking, stairs, and getting in and out of bed"],"avoid":["Putting more than about 20% of your weight on the leg","Walking without crutches and the brace",{"tf":"Bending your knee past 30°","pf":"Bending your knee past 20°"},"Straightening your knee against resistance","Twisting or pivoting on the leg"],"goals":["Pain and swelling stay under control","You can walk safely on two crutches with the brace","You know your exercises and can do them on your own","You know the signs of a wound problem"],"next":"Weeks 2 and 3 focus on getting your knee fully straight and bending further. Weight rules stay strict. All dates are targets that depend on how you are doing."},"notes":[{"title":"Brace","tone":"note","items":["Brace stays on 24 h/day for the first 3 weeks, except during CPM or PT."]}]},{"key":"p2","num":"2","name":"Restore mobility","range":"Weeks 2–3","start":1,"end":3,"stage":{"name":"Implantation and protection","text":"Cells adhere to bone and begin to proliferate through the defect."},"limits":{"wb":{"tf":["r","Progress from <20% to 30% body weight"],"pf":["r","Progress from <20% to 50% body weight"]},"rom":{"tf":["r","Active, progress from 30° to 90°"],"pf":["r","Active, progress from 30° to 60°"]},"brace":{"tf":["r","Progress from 30° to 45°"],"pf":["r","Locked at full knee extension"]},"aids":{"tf":["r","2 crutches"],"pf":["r","2 crutches"]}},"focus":"Get pain-free full passive extension, keep weight bearing limited, hold muscle tone, and control edema and the wound.","groups":[["First outpatient visit",["Review pain and medication use","Brace fitted and set (0° to 30°, or per surgeon)","Crutch proficiency on level ground and stairs","Partial WB education (20% or less, or per surgeon)","Review surgeon restrictions","Review and progress the home program"]],["Mobility",["CPM 20 to 30 min at the end of each session","Passive and active heel slides","Full knee extension","Careful patellar mobilization in all directions"]],["Strength",["Quad isometrics and co-contraction, with NMES to drive voluntary contraction","Isometric glute, hamstring, adductor, calf","Straight-leg raises: flexion, abduction, adduction, extension"]],["Pool",["Deep-water walking: forward, backward, sideways","Deep-water calf raises","Straight-leg hip motions, with or without flotation","Passive knee flexion, hamstring and calf stretching"]],["Swelling",["Lymphatic or clearance massage as needed","Ice, compression, elevation regularly"]]],"gateTitle":"Criteria to progress","criteria":[{"tf":"Pain-free knee flexion of 90°.","pf":"Pain-free knee flexion of 60°."},"Pain-free full passive knee extension.",{"tf":"Independent heel-toe gait on 2 crutches and brace at 30% body weight.","pf":"Independent heel-toe gait on 2 crutches and brace at 50% body weight."},"Pain and swelling under control.","Able to generate an active isometric quad contraction.","Independent with the home exercise program."],"patient":{"title":"Restore motion","short":"Motion","summary":"You work on getting your knee fully straight and bending further, while the graft is still protected by limited weight.","numbers":[["Weight on the leg",{"tf":"Slowly up to about 30% of your weight","pf":"Slowly up to about 50% of your weight"}],["Knee bending",{"tf":"Up to about 90°","pf":"Up to about 60°"}],["Brace",{"tf":"On, opening slowly to about 45°","pf":"On and locked straight"}],["Crutches","Two crutches"]],"do":["Slide your heel to bend your knee, and work to get it fully straight","Gently move your kneecap as taught","Tighten your thigh muscle, using the muscle stimulator if you were given one","Do straight leg raises in all four directions","Do pool walking if your therapist says it is okay","Ice, compress, and raise your leg to control swelling"],"avoid":[{"tf":"Bending your knee past 90°","pf":"Bending your knee past 60°"},"Going over your weight limit","Walking without crutches and the brace","Taking the brace off except for exercises and therapy"],"goals":[{"tf":"Bend your knee to 90° without pain","pf":"Bend your knee to 60° without pain"},"Straighten your knee all the way without pain",{"tf":"Walk on two crutches with about 30% of your weight on the leg","pf":"Walk on two crutches with about 50% of your weight on the leg"},"Swelling and pain stay under control","Tighten your thigh muscle on command"],"next":"Weeks 4 to 6 add more weight, more bend, and bigger strengthening. All dates are targets that depend on how you are doing."}},{"key":"p3","num":"3","name":"Strengthen and straighten","range":"Weeks 4–6","start":3,"end":6,"stage":{"name":"Implantation and protection","text":"Cells adhere to bone and begin to proliferate through the defect."},"limits":{"wb":{"tf":["p","Progress from <40% to 60% body weight"],"pf":["p","Progress from 75% to full body weight"]},"rom":{"tf":["p","Active, progress from 110° to 125°"],"pf":["p","Active, progress from 90° to 125°"]},"brace":{"tf":["p","Progress from 45° to full extension"],"pf":["p","Use brace as required, beginning week 6"]},"aids":{"tf":["p","1 to 2 crutches, per weight-bearing status"],"pf":["p","1 to 2 crutches weeks 4–5; 1 crutch as required week 6"]}},"focus":"Patient is walking on crutches, so raise weight bearing and ROM as appropriate and step up strengthening.","groups":[["Mobility and flexibility",["Continue phase 2 stretching","Stretch hamstrings and calf","Patellar mobilization in all directions","CPM to maximum comfortable range as required","Coach heel-to-toe gait"]],["Strength: keep phase 2 work and add",["Progress straight-leg raises (half-seated, externally rotated foot)","Side-lying glute work with a flexed knee","Standing calf raises, per WB status","Seated or standing weighted hip adduction and abduction","Trunk work: supine sit-ups, supported trunk flexion","Recumbent bike with flexion limited to 90° (weeks 5 to 6)"]],["Pool",["Active knee flexion with flotation resistance","Shallow-water walking at waist depth, per WB status","Shallow-water calf raises","Deep-water squats","Pool cycling through full knee ROM"]],["Swelling",["Lymphatic massage, ice, compression, elevation as required"]]],"gateTitle":"Criteria to progress","criteria":["Pain-free active knee flexion to 125°.","Independent performing home exercises, including a straight-leg raise.",{"tf":"Pain-free gait on 1 to 2 crutches with a brace, at about 60% body weight.","pf":"Progressed to full weight bearing as tolerated, following surgeon clearance."}],"patient":{"title":"Walking and strength","short":"Build","summary":"You are walking on crutches, so we raise your weight and bending limits and build more strength.","numbers":[["Weight on the leg",{"tf":"From about 40% up to about 60% of your weight","pf":"Up to full weight, once your surgeon clears you"}],["Knee bending",{"tf":"From about 110° up to about 125°","pf":"From about 90° up to about 125°"}],["Brace",{"tf":"Opening from about 45° to fully straight","pf":"Only if needed, starting around week 6"}],["Crutches",{"tf":"One or two crutches","pf":"Two crutches at first, then one if needed in week 6"}]],"do":["Keep stretching your hamstrings and calves","Do straight leg raises and side-lying hip lifts","Do standing calf raises as your weight limit allows","Use the recumbent bike, bending no more than 90° (weeks 5 and 6)","Do pool walking and pool cycling if your therapist says it is okay","Walk with a heel-to-toe step"],"avoid":["Going over the weight limit for this stage","Bending past what your therapist allows","Dropping your crutches before you are cleared"],"goals":["Bend your knee to about 125° without pain","Do your home exercises on your own, including a straight leg raise",{"tf":"Walk with one or two crutches and the brace, with about 60% of your weight on the leg","pf":"Walk at full weight once your surgeon clears you"}],"next":"Weeks 7 to 12 wean you off crutches and the brace and make you independent. All dates are targets."}},{"key":"p4","num":"4","name":"Independent movement","range":"Weeks 7–12","start":6,"end":12,"stage":{"name":"Transition and proliferation","text":"Continued proliferation forms a defect-spanning matrix."},"limits":{"wb":{"tf":["p","Progress from 80% to full, weeks 8 to 10"],"pf":["p","Full"]},"rom":{"tf":["p","Active, full by weeks 7 to 8"],"pf":["p","Active, full by weeks 7 to 8"]},"brace":{"tf":["p","Full knee flexion allowed within the brace"],"pf":["p","No brace"]},"aids":{"tf":["p","Full weight bearing indoors; single crutch outdoors and in unfamiliar areas"],"pf":["p","No crutches"]}},"focus":"Wean off crutches and brace. Become fully independent with the program as clinic visits taper.","groups":[["Mobility and flexibility",["Passive knee ROM on a rowing ergometer (weeks 9 to 10)","Quad stretching (weeks 9 to 10)","Patellar mobilization, CPM to comfortable range as required","Continue phase 2 to 3 stretching"]],["Strength",["Continue phase 2 to 3 strengthening","Standing weighted hip adduction and abduction","Weighted knee flexion (week 8)","Upright bike at 105° to 110° flexion (weeks 9 to 12)"]],["Pool",["Progress water squats","Weight-supported lunges","Weight-supported step ups and downs","Quad stretching"]],["Proprioception: start after full WB, progress by changing",["Posture: seated to standing","Environment: gym or pool","Sensory input: eyes open or closed","Speed of movement","Base of support: two legs to one","Surface: soft mat, pillow, wobble board, dura disc, ball, mini-tramp","Weight transfer and activity-specific drills"]]],"gateTitle":"Criteria to progress","criteria":["Active knee ROM within anatomical limits.","Pain-free six-minute walk test without crutches or aids.","Upright stationary bike without the brace.","Independent home and gym program for after clinic discharge.","Proprioception work started.","Full weight bearing reached."],"patient":{"title":"Becoming independent","short":"Independent","summary":"You come off crutches and the brace and take over your own program as clinic visits taper.","numbers":[["Weight on the leg",{"tf":"From about 80% up to full weight by weeks 8 to 10","pf":"Full weight"}],["Knee bending","Full motion by weeks 7 to 8"],["Brace",{"tf":"Full bending inside the brace, then off","pf":"No brace"}],["Crutches",{"tf":"None indoors; one crutch outdoors and in new places","pf":"None"}]],"do":["Use the rowing machine for gentle motion (weeks 9 and 10)","Stretch your quads and hamstrings","Do weighted hip and calf work","Ride an upright bike (weeks 9 to 12)","Practice balance once you are at full weight","Do pool squats, lunges, and step-ups"],"avoid":["Running, jumping, and sports that twist or pivot","Adding heavy exercise before your therapist says so"],"goals":["Bend and straighten your knee fully without pain","Walk for 6 minutes without crutches or aids","Ride an upright bike without the brace","Do your home and gym program on your own","Reach full weight on the leg"],"next":"Months 3 to 6 bring you back to daily activity. Around 3 months you will have a check-in assessment. All dates are targets."},"callout":"Around 3 months, do a post-op assessment and send the surgeon a written report ahead of their review."},{"key":"p5","num":"5","name":"Return to daily activity","range":"Months 3–6","start":12,"end":26,"stage":{"name":"Remodeling","text":"The matrix expands to a putty-like consistency."},"limits":{"wb":{"tf":["c","Full"],"pf":["c","Full"]},"rom":{"tf":["c","Full, pain-free active"],"pf":["c","Full, pain-free active"]},"brace":{"tf":["c","None"],"pf":["c","None"]},"aids":{"tf":["c","None"],"pf":["c","None"]}},"focus":"Most patients return to strenuous daily activity on a limited basis. Continue in clinic once or twice weekly (group-supervised) or on an independent gym and home program.","groups":[["Keep",["Phase 3 to 4 stretching and strengthening"]],["Add",["Bridging","Standing single-leg calf raises","Modified open-chain work, such as terminal knee extension, dosed by lesion location and joint mechanics","Modified closed-chain work: inner-range quads, leg press","Progress upright and outdoor road cycling","Rowing ergometry as tolerated"]]],"gateTitle":"Criteria to progress","criteria":["Normal gait with no aids or brace.","Stairs and mild gradients handled.","Back at work, as the job allows.","Weighted leg press through 60° to 90° flexion at under 50% body-weight load.","Independent with full weight-bearing proprioception."],"patient":{"title":"Back to daily activities","short":"Daily life","summary":"Most people return to everyday activity, including work, on a limited basis. Your knee still needs steady strengthening.","numbers":[["Weight on the leg","Full"],["Knee motion","Full, without pain"],["Brace","None"],["Work","Back as your job allows"]],"do":["Keep up your stretching and strengthening","Add bridges and single-leg calf raises","Do leg press and inner-range thigh work as your therapist directs","Ride a bike outdoors, building up slowly","Use the rowing machine as you tolerate it","Go to therapy once or twice a week, or follow your gym program"],"avoid":["Running, jumping, and sports that twist or pivot","Leg press loads over about half your body weight"],"goals":["Walk normally with no crutches or brace","Handle stairs and gentle hills","Go back to work as your job allows","Leg press under half your body weight through 60° to 90° of bend","Balance well on one leg"],"next":"Months 6 to 9 add low-impact recreation as you build strength. All dates are targets."}},{"key":"p6","num":"6","name":"Recreational activities","range":"Months 6–9","start":26,"end":39,"stage":{"name":"Maturation","text":"Progressive hardening into durable repair tissue."},"limits":{"wb":{"tf":["c","Full"],"pf":["c","Full"]},"rom":{"tf":["c","Full, pain-free active"],"pf":["c","Full, pain-free active"]},"brace":{"tf":["c","None"],"pf":["c","None"]},"aids":{"tf":["c","None"],"pf":["c","None"]}},"focus":"Return to low-impact recreation by gradually raising difficulty. The patient should cope with uneven ground, inclines, and other obstacles.","groups":[["Keep",["Phase 3 to 4 stretching and strengthening"]],["Progress",["Harder open-chain exercises","Harder closed-chain exercises: step ups and downs, modified squats","Controlled running on a mini-trampoline"]]],"gateTitle":"Criteria to progress","criteria":["Hamstring and calf strength at 80 to 90% of the other leg.","Walks more than 3 miles (5 km).","Handles uneven ground, including soft sand.","Back to low-impact recreational activity."],"patient":{"title":"Low-impact recreation","short":"Recreation","summary":"You return to low-impact activities by making them harder step by step. You should handle uneven ground and slopes with ease.","numbers":[["Weight on the leg","Full"],["Strength goal","Hamstrings and calves 80 to 90% of the other leg"],["Walking goal","More than 3 miles"],["Impact","No heavy impact, cutting, or pivoting"]],"do":["Keep up your stretching and strengthening","Add harder step-ups, step-downs, and modified squats","Practice walking on uneven ground and soft sand","Do controlled bouncing on a mini-trampoline if your therapist adds it","Build your walking distance toward 3 miles","Do low-impact activities your therapist approves"],"avoid":["Heavy impact activities","Cutting and pivoting"],"goals":["Hamstring and calf strength 80 to 90% of the other leg","Walk more than 3 miles","Walk on uneven ground, including soft sand","Return to low-impact recreation"],"next":"Months 9 to 12 bring full activities back one at a time. Many people take longer than a year to fully return. All dates are targets."}},{"key":"p7","num":"7","name":"Return to full activity","range":"Months 9–12","start":39,"end":52,"stage":{"name":"Maturation","text":"Progressive hardening into durable repair tissue."},"limits":{"wb":{"tf":["c","Full"],"pf":["c","Full"]},"rom":{"tf":["c","Full, pain-free active"],"pf":["c","Full, pain-free active"]},"brace":{"tf":["c","None"],"pf":["c","None"]},"aids":{"tf":["c","None"],"pf":["c","None"]}},"focus":"Full demands on the knee as repair tissue continues to mature. Activities are introduced in isolation first, then with the right equipment.","groups":[["Keep",["Phase 3 to 6 stretching and strengthening"]],["Progress",["Harder closed-chain exercises","Agility work specific to the patient’s activities","Begin the return-to-running program"]]],"gateTitle":"Before clearing any activity","criteria":["Graft has matured enough for that activity’s demands.","Patient is physically and psychologically ready.","A surgeon experienced with MACI has assessed the knee."],"patient":{"title":"Return to full activity","short":"Full activity","summary":"Your repair tissue keeps maturing, so we bring back full activities one at a time. Many people take longer than a year to fully return.","numbers":[["Weight on the leg","Full"],["Running","Starts with a return-to-running program"],["Heavy twisting and impact","Not until 12 to 18 months, or as your surgeon directs"],["Final say","Your surgeon's clearance"]],"do":["Keep up your stretching and strengthening","Do harder step-ups and squats as your therapist directs","Practice agility drills for your own activity","Start the return-to-running program as your therapist directs"],"avoid":["Heavy squeezing, shear, and twisting loads until 12 to 18 months, or as your surgeon directs","Going back to any activity before it is cleared"],"goals":["Your repair is ready for the activity (your surgeon decides)","You feel physically and mentally ready","A surgeon experienced with MACI has examined your knee"],"next":"After clearance, activities return one at a time. Keep strengthening to protect the repair."},"notes":[{"title":"Timing","tone":"restrict","items":["High-compression, shear, and rotational loads until 12 to 18 months, or as the surgeon directs"]}],"callout":"Expect return to normal activities to take longer than the first post-op year."}],"keyDates":[{"label":"Suture or staple removal","when":"Days 8 to 10","week":1},{"label":"Surgeon follow-up","when":"Weeks 4 to 6","week":4,"patient":"Your usual surgeon follow-up visit is around 4 to 6 weeks"},{"label":"Full weight bearing (tibiofemoral)","when":"Weeks 8 to 10","week":8},{"label":"Post-op assessment and written report to surgeon","when":"~3 months","months":3,"patient":"Your 3-month check-in assessment"},{"label":"High-compression, shear, and rotational loads","when":"12 to 18 months or per surgeon","months":12}],"extrasTitle":"Check before use, and notes beyond the manual","extras":[{"title":"Differences found in the Feb 2021 Vericel manual","items":["Flexion: the 2021 manual lists 'knee flexion beyond 45°' as a rehabilitation contraindication for 0 to 3 months, with no loaded-only qualifier found. This page progresses flexion to 90° (tibiofemoral, weeks 2 to 3) and 125° by weeks 4 to 6","Active ROM timing: 2021 manual gives early active ROM at 2 weeks (PF single), 4 weeks (PF multiple), immediately (TF); full active ROM at 6 weeks (PF single), 8 to 10 weeks (PF multiple), 4 weeks as tolerated (TF); full ROM at 7 to 9 weeks for all","Weight bearing: TF <20% BW, rising 10 to 15% per week after week 1, full WB 7 to 9 weeks. PF single: 81 to 100% immediately. PF multiple: <20% if uncontained (rising 15 to 20% per week), 81 to 100% if contained, full WB 5 to 6 weeks. This page's patellofemoral numbers match the PF multiple, uncontained profile, which is more protective than PF single","Not found in the 2021 manual: hamstring and calf 80 to 90% target, a 3-mile walking goal, a 12 to 18 month impact restriction. The 2021 manual puts release to contact and collision sports at 10 to 12+ months, running evaluation at 6 to 8 months, and release to running at 7 to 12 months"]},{"title":"Notes beyond the manual","items":["The later phases have few objective gates: no quad strength target, no hop or landing testing, no running criteria. Set measurable gates and agree on them with the surgeon before the run-and-agility phase","Concomitant procedures (meniscus repair, ligament reconstruction, osteotomy): this tracker is only a baseline. Take the most restrictive limit for each variable from the surgeon's written protocol","Get the lesion details: location, size, containment, and fixation method. Uncontained lesions and lesions over 10 cm² may get suture fixation","Two brace clocks run at once: on 24 h/day for 3 weeks, yet the brace progression continues into weeks 4 to 12. Confirm when the brace comes off for sleep and for non-weight-bearing ROM work"]}],"reviewFlags":[{"item":"Flexion limits conflict with the current manual","why":"The February 2021 Vericel manual lists flexion beyond 45° as a contraindication through the first 3 months and gives no numeric active ROM beyond 45°. This page's flexion numbers (90° at weeks 2 to 3, 125° at weeks 4 to 6) came from your published tracker and likely from the 2018 edition. Confirm against the edition your surgeons use before any patient sees this."},{"item":"Source edition","why":"The tracker cites the 2018 manual and 06/2017 prescribing information. Only the 2021 revision was retrievable this session, read through a page-summary tool that could not reproduce the tables exactly. Re-read the actual PDF."},{"item":"Return-to-activity criteria not found in the 2021 manual","why":"Hamstring and calf 80 to 90%, the 3-mile walking goal, and the 12 to 18 month impact restriction were not found. They may come from the 2018 edition or from clinical judgment. Source them or label them as such."},{"item":"Patellofemoral weight bearing","why":"The page uses the PF multiple, uncontained profile for all PF grafts. For a PF single graft the manual allows 81 to 100% weight bearing immediately, so the page is more protective than the manual there. Decide whether to split single and multiple."},{"item":"Single versus multiple defects","why":"The selector only shows a caution banner. It does not change any number, because the manual does not publish separate multifocal figures by lesion count."},{"item":"Phase boundaries","why":"Weeks are counted from the surgery date: phase 1 is days 0 to 6, phase 2 starts on day 7 and is labeled 'Weeks 2–3' to match the manual."},{"item":"Patient wording and call list","why":"Plain-language ranges and the warning-sign list are standard practice, not quoted from the manual. Reconcile with the surgeon's own patient handout."}],"callSurgeon":["Sharp pain with locking, catching, or a new mechanical symptom","Swelling or effusion that keeps coming back or worsens with progression","Wound redness, drainage, warmth, or fever","Calf pain or swelling, or shortness of breath (thromboembolic events are a named risk)","Pain that does not settle with load reduction (graft hypertrophy and delamination are listed postmarketing reactions; tendonitis was among the most frequent adverse reactions in the MACI trials)"],"patient":{"title":"Your knee recovery: MACI cartilage implant","callIf":["Sharp pain with locking, catching, or a new clicking or giving way","Swelling that keeps coming back or gets worse as you do more","A wound that is red, hot, leaking, or opening, or a fever","Calf pain, swelling, or warmth. Call 911 for chest pain or trouble breathing","Pain that does not settle when you cut back your activity"]},"sources":[{"title":"Vericel MACI Rehabilitation Manual (revised Feb 2021, copy hosted by Mayo Clinic CE)","url":"https://ce.mayo.edu/sites/default/files/media/2022-01/MACI%20Rehabilitation%20Manual_0.pdf","note":"Used to check your tracker; it cites the 2018 edition (Ebert)"},{"title":"MACI prescribing information (06/2017)","note":"Cited in your published tracker; not re-read this session"}]}/*END_PROTOCOL_JSON*/;
+
+(function(){
+const P=PROTOCOL, DAY=86400000, SPAN=P.spanWeeks, SEL=P.selectors||[];
+const BRK=(P.timeScale&&P.timeScale.breakWeek)||12, BRKP=(P.timeScale&&P.timeScale.breakPct)||55;
+const PFX=(P.id||"protocol")+"-";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function store(k,v){try{v===null?localStorage.removeItem(PFX+k):localStorage.setItem(PFX+k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(PFX+k)}catch(e){return null}}
+
+/* ---------- link parameters: ?s=YYYY-MM-DD&<selectorId>=<optionId> opens the patient view; add &c=1 for the clinician view ---------- */
+const QS=(function(){try{return new URLSearchParams(location.search||location.hash.replace(/^#/,""))}catch(e){return new URLSearchParams("")}})();
+const LINK_DATE=(function(){const s=QS.get("s");if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const a=s.split("-").map(Number),d=new Date(a[0],a[1]-1,a[2]);return d.getFullYear()===a[0]&&d.getMonth()===a[1]-1&&d.getDate()===a[2]&&a[0]>=2000&&a[0]<=2100?s:null})();
+const PATIENT_MODE=!!LINK_DATE&&QS.get("c")!=="1";
+
+/* ---------- value resolution: variants (selector keyed) and tiers (week keyed) ---------- */
+const sel={};
+SEL.forEach(s=>{const q=QS.get(s.id),v=load("sel-"+s.id);sel[s.id]=s.options.some(o=>o.id===q)?q:(!PATIENT_MODE&&s.options.some(o=>o.id===v)?v:s.options[0].id)});
+function pick(v,w){
+  if(v==null||typeof v!=="object")return v;
+  if(Array.isArray(v))return v.map(e=>pick(e,w));
+  if(Array.isArray(v.tiers)){let t=v.tiers[0];for(const x of v.tiers){if(w>=x[0])t=x}return pick(t.slice(1),w)}
+  for(const s of SEL){if(v[sel[s.id]]!==undefined)return pick(v[sel[s.id]],w)}
+  if(v["default"]!==undefined)return pick(v["default"],w);
+  return v;
+}
+function T(v,w){const r=pick(v,w);return Array.isArray(r)?r[r.length-1]:r}
+function lim(ph,k,w){const v=pick(ph.limits[k],w);return Array.isArray(v)?v:["c",String(v)]}
+function tierWeeks(ph){const out=[];for(const [k] of P.limitKeys){const v=ph.limits[k];if(v&&v.tiers)v.tiers.forEach(t=>{if(t[0]>ph.start)out.push({w:t[0],txt:t[3]||String(pick(t.slice(1),t[0])[1])})})}return out}
+
+/* ---------- dates ---------- */
+function parseD(s){const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today0(){const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
+function addMonths(d,n){const r=new Date(d);r.setMonth(r.getMonth()+n);return r}
+function diff(a,b){return Math.round((b-a)/DAY)}
+function fmt(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function fmtShort(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+function rel(n){return n===0?"today":n>0?"in "+n+" day"+(n===1?"":"s"):Math.abs(n)+" day"+(n===-1?"":"s")+" ago"}
+function xpos(w){w=Math.max(0,Math.min(SPAN,w));return w<=BRK?w/BRK*BRKP:BRKP+(w-BRK)/(SPAN-BRK)*(100-BRKP)}
+function phaseDate(sx,wk){return addDays(sx,Math.round(wk*7))}
+function wkOf(ph){return ph.start<0?0:ph.start}
+
+const sxEl=$("sx");
+let isExample=false;
+(function(){const saved=LINK_DATE||load("sx");if(saved){sxEl.value=saved}else{sxEl.value=iso(addDays(today0(),-Math.round((P.exampleWeek||6)*7)));isExample=true}})();
+const posts=P.phases.filter(p=>p.start>=0);
+function curPhase(w){return P.phases.find(p=>w>=p.start&&w<p.end)||(w>=SPAN?P.phases[P.phases.length-1]:null)}
+
+/* ---------- static header ---------- */
+document.title=P.title;
+$("title").textContent=P.title;
+$("subtitle").textContent=P.subtitle||"";
+$("foot").innerHTML=(P.sources&&P.sources.length?"Sources: "+P.sources.map(s=>s.url?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>'+(s.note?" ("+esc(s.note)+")":""):esc(s.title)+(s.note?" ("+esc(s.note)+")":"")).join("; ")+". ":"")+
+  "The surgery date, selections, and checkbox progress stay in this browser only. The operating surgeon's post-op orders supersede this page.";
+
+function renderSelectors(){
+  $("selectors").innerHTML=SEL.map(s=>'<div class="datebox selbox"><span class="lab">'+esc(s.label)+'</span><div class="segctl" role="group" aria-label="'+esc(s.label)+'">'+
+    s.options.map(o=>'<button type="button" data-sel="'+esc(s.id)+'" data-opt="'+esc(o.id)+'" aria-pressed="'+(sel[s.id]===o.id)+'">'+esc(o.label)+'</button>').join("")+'</div></div>').join("");
+  const bn=[];
+  SEL.forEach(s=>s.options.forEach(o=>{if(sel[s.id]===o.id&&o.banner)bn.push('<div class="banner"><b>'+esc(o.label)+':</b> '+esc(o.banner)+'</div>')}));
+  $("banners").innerHTML=bn.join("");
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-sel]");if(!b)return;
+  sel[b.dataset.sel]=b.dataset.opt;store("sel-"+b.dataset.sel,b.dataset.opt);renderAll();
+});
+
+/* ---------- clinician view ---------- */
+function renderClinician(){
+  $("example").hidden=!isExample;
+  if(!sxEl.value)return;
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w), show=cur||posts[0];
+
+  $("weekread").innerHTML=d<0?"Surgery <b>"+rel(d)+"</b>":"Post-op day <b>"+d+"</b> · week <b>"+(Math.floor(d/7)+1)+"</b>";
+
+  const th=$("todayhead"),td=$("today"),nx=$("nextup");
+  const selTxt=SEL.map(s=>s.options.find(o=>o.id===sel[s.id]).label.toLowerCase()).join(", ");
+  if(d<0&&!P.phases.some(p=>p.start<0)){th.innerHTML='<span class="ph-name">Pre-op</span><span>Limits below start on the day of surgery</span>';}
+  else{const pp=d<0?P.phases[0]:show;
+    th.innerHTML='<span class="ph-name">Phase '+esc(pp.num)+': '+esc(pp.name)+'</span><span><b>'+esc(pp.range)+'</b>'+(pp.start>=0?' · '+fmtShort(phaseDate(sx,pp.start))+' to '+(pp.end>=SPAN?"discharge":fmtShort(addDays(phaseDate(sx,pp.end),-1))):'')+(selTxt?' · '+esc(selTxt):'')+'</span>';}
+  const lp=d<0&&P.phases[0].start<0?P.phases[0]:show;
+  td.innerHTML=P.limitKeys.map(([k,l])=>{const v=lim(lp,k,ww);return '<div><div class="k">'+esc(l)+'</div><div class="v '+v[0]+'">'+esc(v[1])+'</div></div>'}).join("");
+  const nk=P.limitKeys.length;td.style.setProperty("--cols",nk<=5?nk:(nk%3===0?3:4));
+
+  // next change: next phase start or next tier inside the current phase
+  const ch=[];posts.forEach(p=>{if(p.start>w+1e-9)ch.push({w:p.start,txt:"Phase "+p.num+": "+p.name})});
+  if(cur)tierWeeks(cur).forEach(c=>{if(c.w>w+1e-9)ch.push(c)});
+  ch.sort((a,b)=>a.w-b.w);
+  if(ch.length){const dt=phaseDate(sx,ch[0].w);nx.innerHTML="Next change: <b>"+esc(ch[0].txt)+"</b> on "+fmt(dt)+" ("+rel(diff(t,dt))+")"}else nx.textContent="";
+
+  // standing precautions
+  $("standing").innerHTML=P.standingPrecautions&&P.standingPrecautions.length?'<div class="ov"><div class="t">'+esc(P.standingPrecautionsTitle||"Standing precautions")+'</div><ul>'+P.standingPrecautions.map(i=>'<li>'+esc(T(i,ww))+'</li>').join("")+'</ul></div>':"";
+
+  // lanes
+  const nowX=xpos(ww);
+  $("lanes").innerHTML=P.lanes.map(L=>'<div class="lane"><div class="ln">'+esc(L.name)+'</div><div class="bar">'+
+    L.segs.map(s=>{const a=xpos(s[0]),b=xpos(s[1]),lb=T(s[3],ww);return '<div class="seg '+s[2]+'" style="left:'+a+'%;width:'+(b-a)+'%" title="'+esc(lb)+'">'+esc(lb)+'</div>'}).join("")+
+    (d>=0?'<div class="nowline" style="left:calc('+nowX+'% - 1px)"></div>':'')+'</div></div>').join("");
+  const shift=nowX<8?"0":nowX>92?"-100%":"-50%";
+  $("nowlabel").innerHTML=d<0?"":'<span style="left:'+nowX+'%;transform:translateX('+shift+')">Today · wk '+(Math.floor(d/7)+1)+' ▾</span>';
+  const ticks=P.tickWeeks||[0,2,4,6,8,12,16,26,39,52];
+  $("ticks").innerHTML=ticks.map((k,i)=>'<span class="'+(i===ticks.length-1?"last":"")+'" style="left:'+xpos(k)+'%">'+(P.tickLabels&&P.tickLabels[String(k)]?esc(P.tickLabels[String(k)]):(i===ticks.length-1?k+" wk":k))+'</span>').join("");
+
+  // phases
+  const openSet=new Set([...document.querySelectorAll("details.ph[open]")].map(e=>e.dataset.key));
+  const first=!document.querySelector("details.ph");
+  $("phases").innerHTML=P.phases.map(p=>{
+    const isCur=p===cur&&d>=0, done=w>=p.end&&p.end<SPAN&&d>=0;
+    const chip=isCur?'<span class="chip now">Current</span>':done?'<span class="chip done">Complete</span>':(p.start>=0?'<span class="chip up">Starts '+fmtShort(phaseDate(sx,p.start))+'</span>':'<span class="chip up">Pre-op</span>');
+    const crit=p.criteria.map((c,i)=>{const id="c-"+p.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-k="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(T(c,ww))+'</label></li>'}).join("");
+    const nChecked=p.criteria.filter((c,i)=>load("c-"+p.key+"-"+i)==="1").length;
+    const lw=isCur?ww:wkOf(p);
+    const open=first?isCur:openSet.has(p.key);
+    const lm=P.limitKeys.map(([k,l])=>{const v=lim(p,k,lw);return '<div class="'+v[0]+'"><div class="k">'+esc(l)+'</div><div class="v">'+esc(v[1])+'</div></div>'}).join("");
+    const notes=(p.notes||[]).map(n=>'<div class="ov'+(n.tone==="note"?" note":"")+'"><div class="t">'+esc(n.title)+'</div><ul>'+n.items.map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join("");
+    return '<details class="ph'+(isCur?" current":"")+'" data-key="'+esc(p.key)+'"'+(open?" open":"")+'><summary><div class="pn">'+esc(p.num)+'</div><div><div class="pt">'+esc(p.name)+'</div><div class="pw">'+esc(p.range)+(p.start>=0?' · '+fmtShort(phaseDate(sx,p.start))+(p.end<SPAN?' – '+fmtShort(addDays(phaseDate(sx,p.end),-1)):' onward'):'')+'<span class="progress" data-prog="'+esc(p.key)+'">'+nChecked+'/'+p.criteria.length+' criteria</span></div></div>'+chip+'</summary><div class="body">'+
+      (p.stage?'<p class="pw" style="margin:0 0 10px"><b>'+esc(p.stage.name)+'.</b> '+esc(p.stage.text)+'</p>':'')+
+      '<div class="limits">'+lm+'</div>'+
+      (p.focus?'<p>'+esc(T(p.focus,lw))+'</p>':'')+
+      (p.goals&&p.goals.length?'<h3>Goals</h3><ul>'+p.goals.map(g=>'<li>'+esc(T(g,lw))+'</li>').join("")+'</ul>':'')+
+      (p.groups&&p.groups.length?'<h3>Interventions</h3>'+p.groups.map(g=>'<div class="grp"><b>'+esc(g[0])+'</b><ul>'+g[1].map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join(""):'')+
+      notes+
+      (p.callout?'<p class="cal">'+esc(p.callout)+'</p>':'')+
+      '<h3>'+esc(p.gateTitle||"Criteria to progress")+'</h3><ul class="crit">'+crit+'</ul></div></details>'}).join("");
+
+  // key dates
+  const kd=P.keyDates||[];
+  $("keydates-wrap").hidden=!kd.length;
+  $("dates").innerHTML=kd.map(r=>{const dt=r.months!=null?addMonths(sx,r.months):phaseDate(sx,r.week);const n=diff(t,dt);const cls=n<0?"past":n<=14?"soon":"";
+    return '<tr class="'+cls+'"><td>'+esc(r.label)+'</td><td>'+esc(r.when)+'</td><td class="d">'+fmt(dt)+'</td><td class="s d">'+(n<0?"Done":rel(n))+'</td></tr>'}).join("");
+
+  // extras, flags, review
+  $("extras").innerHTML=P.extras&&P.extras.length?'<h2>'+esc(P.extrasTitle||"Testing, manual therapy, discharge")+'</h2><div class="cards">'+P.extras.map(c=>'<div><h3>'+esc(c.title)+'</h3><ul>'+c.items.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>').join("")+'</div>':"";
+  const fl=P.callSurgeon||[];$("flags").hidden=!fl.length;$("flagsList").innerHTML=fl.map(i=>'<li>'+esc(i)+'</li>').join("");
+  const rv=P.reviewFlags||[];$("review").hidden=!rv.length;$("reviewList").innerHTML=rv.map(r=>'<li><b>'+esc(r.item)+'</b>'+(r.why?' — '+esc(r.why):'')+'</li>').join("");
+}
+
+/* ---------- patient snapshot ---------- */
+function renderSnapshot(){
+  const el=$("snapshot");
+  if(!sxEl.value){el.innerHTML='<div class="sn-card"><p>Enter the date of surgery on the clinician page first.</p><button type="button" id="closeSnap">Back to protocol</button></div>';return}
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w);
+  const ph=d<0?(P.phases.find(p=>p.start<0)||posts[0]):(cur||posts[0]);
+  const pt=ph.patient||{};
+  const idx=posts.indexOf(ph), next=d<0?(P.phases.find(p=>p.start<0)?posts[0]:posts[1]):posts[idx+1];
+  const steps=posts.map((p,i)=>'<div class="s '+(d>=0&&p===ph?"cur":(d>=0&&w>=p.end?"done":""))+'"><div class="b"></div><div class="l">'+esc(p.patient&&p.patient.short||p.name)+'</div></div>').join("");
+  const nums=(pt.numbers||P.limitKeys.map(([k,l])=>[l,lim(ph,k,ww)[1]])).map(n=>'<div><div class="k">'+esc(n[0])+'</div><div class="v">'+esc(T(n[1],ww))+'</div></div>').join("");
+  const sPick=a=>(a||[]).map(i=>T(i,ww));
+  const ul=a=>'<ul>'+sPick(a).map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul>';
+  const goals=sPick(pt.goals).map((g,i)=>{const id="sg-"+ph.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-sg="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(g)+'</label></li>'}).join("");
+  const upcoming=(P.keyDates||[]).filter(k=>k.patient).map(k=>({k,dt:k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week)})).filter(x=>diff(t,x.dt)>=0).sort((a,b)=>a.dt-b.dt)[0];
+  const nextHtml=(next||pt.next)?'<div class="sn-box next"><h3>Coming up next</h3>'+(next?'<p style="margin:0 0 4px"><b>'+esc(next.patient&&next.patient.short||next.name)+'</b> · expected around '+fmt(phaseDate(sx,next.start))+'</p>':'')+(pt.next?'<p style="margin:0;font-size:14.5px">'+esc(T(pt.next,ww))+'</p>':'')+(upcoming&&(!next||upcoming.k.week!==next.start)?'<p style="margin:6px 0 0;font-size:13.5px;color:var(--muted)">Also: '+esc(upcoming.k.patient===true?upcoming.k.label:upcoming.k.patient)+' · '+fmt(upcoming.dt)+'</p>':'')+'</div>':'';
+  const call=(P.patient&&P.patient.callIf)||P.callSurgeon||[];
+  const sv=k=>esc(load("sn-"+k)||"");
+  el.innerHTML=
+   '<div class="noprint modebar" style="margin:0 0 14px;align-items:center"><button type="button" class="primary" id="icsBtn">Add milestones to my calendar</button>'+(PATIENT_MODE?'':'<button type="button" id="closeSnap">← Back to protocol</button>')+(P.allowPrint?'<button type="button" id="printSnap">Print or save as PDF</button>':'')+(PATIENT_MODE?'':'<span class="pw">Need a PDF copy for the patient? Ask Claude for the snapshot and give it the surgery date.</span>')+'</div>'+
+   '<div class="sn-card">'+
+    '<div class="sn-top"><div><div class="kicker">Your recovery snapshot</div><h1>'+esc((P.patient&&P.patient.title)||P.title)+'</h1></div>'+
+    '<div class="sn-meta">As of <b>'+fmt(t)+'</b><br>'+(d<0?'Surgery '+rel(d):'Surgery '+fmt(sx)+' · <b>week '+(Math.floor(d/7)+1)+'</b>')+'</div></div>'+
+    '<div class="sn-name"><label for="sn-name">Name</label><input type="text" id="sn-name" data-sn="name" value="'+sv("name")+'" placeholder="Optional. Stays on this device"></div>'+
+    '<div class="steps" aria-label="Recovery phases">'+steps+'</div>'+
+    '<div class="sn-where"><div class="ph">'+esc(d<0?"Getting ready for surgery":(ph.patient&&ph.patient.title)||ph.name)+'</div><div class="when">'+esc(ph.range)+'</div><p>'+esc(T(pt.summary,ww)||"")+'</p></div>'+
+    '<div class="sn-nums">'+nums+'</div>'+
+    '<div class="sn-two"><div class="sn-box do"><h3>Keep doing</h3>'+ul(pt.do)+'</div><div class="sn-box avoid"><h3>Please avoid for now</h3>'+ul(pt.avoid)+'</div></div>'+
+    '<div class="sn-two"><div class="sn-box goals"><h3>What we are working toward</h3><ul class="sn-goals">'+goals+'</ul></div>'+nextHtml+'</div>'+
+    (call.length?'<div class="sn-call"><h3>Call your surgeon or therapist if</h3><ul>'+call.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>':'')+
+    '<div class="sn-foot"><div><label for="sn-th">Your therapist</label><input type="text" id="sn-th" data-sn="th" value="'+sv("th")+'"></div><div><label for="sn-ph">Clinic phone</label><input type="text" id="sn-ph" data-sn="ph" value="'+sv("ph")+'"></div><div><label for="sn-nv">Next visit</label><input type="text" id="sn-nv" data-sn="nv" value="'+sv("nv")+'"></div></div>'+
+    '<p class="sn-disc">'+esc((P.patient&&P.patient.disclaimer)||"This is a general guide to where you are in your recovery. Your surgeon and therapist may adjust it for you. Their instructions come first.")+'</p>'+
+   '</div>';
+}
+document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.sn;if(k)store("sn-"+k,e.target.value||null)});
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.sg;if(k)store(k,e.target.checked?"1":null)});
+
+/* ---------- mode + wiring ---------- */
+function setMode(snap){document.body.classList.toggle("snap",snap);$("snapshot").hidden=!snap;$("clinician").hidden=snap;if(snap){renderSnapshot();window.scrollTo(0,0)}}
+function doPrint(){try{window.print()}catch(e){}}
+document.addEventListener("click",e=>{
+  const id=e.target.id;
+  if(id==="openSnap")setMode(true);
+  else if(id==="closeSnap")setMode(false);
+  else if(id==="printSnap"||id==="printClin")doPrint();
+});
+sxEl.addEventListener("change",()=>{if(sxEl.value){store("sx",sxEl.value);isExample=false}else{store("sx",null)}renderAll()});
+
+/* ---------- patient link (clinician side) ---------- */
+function patientLink(){
+  if(!sxEl.value||isExample)return"";
+  const q=new URLSearchParams();q.set("s",sxEl.value);SEL.forEach(s=>q.set(s.id,sel[s.id]));
+  return location.origin+location.pathname+"?"+q.toString();
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="linkBtn")return;
+  const box=$("linkBox"),url=patientLink();
+  if(!url){box.hidden=false;box.innerHTML='<span class="pw">Enter the surgery date first.</span>';return}
+  box.hidden=false;
+  box.innerHTML='<label for="linkOut" style="font-size:13px;color:var(--muted)">Patient link (surgery date only, no name)</label><input type="text" id="linkOut" readonly value="'+esc(url)+'" style="width:100%">';
+  const o=$("linkOut");o.focus();o.select();
+  try{navigator.clipboard.writeText(url)}catch(err){}
+});
+
+/* ---------- calendar export (.ics, all-day events, no server) ---------- */
+function icsEscape(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n")}
+function icsDate(d){return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")}
+function buildICS(){
+  const sx=parseD(sxEl.value),t=today0(),ev=[];
+  posts.forEach(p=>{if(p.start>0){const dt=phaseDate(sx,p.start);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery: "+((p.patient&&p.patient.short)||p.name),desc:(p.patient&&T(p.patient.summary,p.start))||""})}});
+  (P.keyDates||[]).filter(k=>k.patient).forEach(k=>{const dt=k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery milestone: "+(k.patient===true?k.label:k.patient),desc:"Target date. It depends on meeting your goals, so check with your therapist."})});
+  const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rehab protocol tracker//EN","CALSCALE:GREGORIAN"];
+  ev.forEach((x,i)=>{const end=addDays(x.dt,1);lines.push("BEGIN:VEVENT","UID:"+(P.id||"protocol")+"-"+icsDate(sx)+"-"+i+"@rehab-tracker","DTSTAMP:"+icsDate(t)+"T000000Z","DTSTART;VALUE=DATE:"+icsDate(x.dt),"DTEND;VALUE=DATE:"+icsDate(end),"SUMMARY:"+icsEscape(x.title),"DESCRIPTION:"+icsEscape(x.desc),"TRANSP:TRANSPARENT","END:VEVENT")});
+  lines.push("END:VCALENDAR");
+  return{text:lines.join("\r\n"),count:ev.length};
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="icsBtn")return;
+  const r=buildICS();
+  if(!r.count){e.target.textContent="No upcoming milestones left";return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([r.text],{type:"text/calendar"}));a.download="recovery-milestones.ics";document.body.appendChild(a);a.click();a.remove();e.target.textContent="Calendar file ready ("+r.count+" events)"}catch(err){e.target.textContent="Download isn't available here"}
+});
+$("phases").addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.k;if(!k)return;
+  store(k,e.target.checked?"1":null);
+  const key=k.split("-")[1],p=P.phases.find(q=>q.key===key);
+  const n=p.criteria.filter((c,i)=>load("c-"+key+"-"+i)==="1").length;
+  const el=document.querySelector('[data-prog="'+key+'"]');if(el)el.textContent=n+"/"+p.criteria.length+" criteria";
+});
+$("expand").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true);
+$("collapse").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=false);
+$("reset").onclick=()=>{P.phases.forEach(p=>p.criteria.forEach((c,i)=>store("c-"+p.key+"-"+i,null)));renderAll()};
+window.addEventListener("beforeprint",()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true));
+
+$("printClin").hidden=!P.allowPrint;
+function renderAll(){renderSelectors();renderClinician();if(document.body.classList.contains("snap"))renderSnapshot()}
+renderAll();
+if(PATIENT_MODE){setMode(true);window.scrollTo(0,0)}
+window.__protocolReady=true;
+})();
+</script>
+</body>
+</html>
