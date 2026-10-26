@@ -82,5 +82,13 @@ window.PROTOCOLS = [
           { id: "pr", label: "Peripheral repair" },
           { id: "cx", label: "Complex repair" } ] }
     ]
+  },
+  {
+    file: "slap.html",
+    title: "SLAP repair (arthroscopic)",
+    area: "Shoulder",
+    status: "review",
+    note: "Sling use and duration are not in the guideline. Confirm from the op report, including any biceps tenodesis or cuff repair. Source is marked OSUWMC use only.",
+    selectors: []
   }
 ];
