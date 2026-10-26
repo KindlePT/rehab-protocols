@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rotator cuff repair rehab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Clinical tracker design system shared by every protocol page: header + date box, today's limits,
+   restriction lanes, phase accordion, key dates, plus a one-page patient snapshot. */
+:root{
+  --paper:#F5F8F7;--surface:#FFFFFF;--ink:#17313F;--muted:#56696F;--line:#D3DDDA;
+  --accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1B21;--surface:#16252D;--ink:#E4EDEF;--muted:#9AAFB5;--line:#2B3E46;
+  --accent:#55B8B4;--restrict:#E27D62;--partial:#E2AA45;--clear:#81BD83;--hold:#AD9CE0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(26px,4.2vw,36px);letter-spacing:-.01em;max-width:24ch}
+h2{font-size:22px;margin:40px 0 14px}
+h3{font-size:17px;margin:18px 0 8px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:64ch}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:600}
+input[type=date],input[type=text]{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;border-bottom:1px solid var(--line);padding-bottom:20px}
+.controls{display:grid;gap:10px;min-width:250px}
+.datebox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.datebox label,.selbox .lab{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.weekread{font-size:14px;margin-top:8px;color:var(--muted);font-variant-numeric:tabular-nums}
+.weekread b{color:var(--ink);font-weight:600}
+.example{font-size:12px;color:var(--partial);margin-top:6px}
+.segctl{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.segctl button{flex:1;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:13px;padding:6px 10px;border-radius:999px}
+.segctl button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.modebar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+.banner{margin-top:16px;border:1px solid color-mix(in srgb,var(--hold) 45%,var(--line));background:color-mix(in srgb,var(--hold) 10%,var(--surface));border-radius:10px;padding:12px 16px;font-size:14.5px}
+
+.todayhead{margin-top:24px;font-size:15px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.todayhead b{color:var(--ink);font-weight:600}
+.todayhead .ph-name{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600}
+.today{margin-top:12px;display:grid;grid-template-columns:repeat(var(--cols,auto-fit),minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.today > div{background:var(--surface);padding:14px 16px;min-width:0;box-shadow:1px 0 0 var(--line),0 1px 0 var(--line)}
+.today .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.today .v{font-size:16px;font-weight:500;margin-top:2px}
+.v.r{color:var(--restrict)}.v.p{color:var(--partial)}.v.c{color:var(--clear)}.v.h{color:var(--hold)}
+.nextup{margin-top:10px;font-size:14px;color:var(--muted)}
+.nextup b{color:var(--ink);font-weight:600}
+
+.ov{border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 7%,var(--surface));border-radius:8px;padding:10px 14px;margin:14px 0}
+.ov .t{font-size:13px;font-weight:600;color:var(--restrict);margin-bottom:4px}
+.ov ul{font-size:14px}
+.ov.note{border-color:color-mix(in srgb,var(--hold) 40%,var(--line));background:color-mix(in srgb,var(--hold) 7%,var(--surface))}
+.ov.note .t{color:var(--hold)}
+.cal{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:0 8px 8px 0;padding:8px 14px;margin:14px 0;font-size:14px}
+
+.tl{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px 12px}
+.lane{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;margin-bottom:8px}
+.lane .ln{font-size:13px;color:var(--muted)}
+.bar{position:relative;height:30px}
+.seg{position:absolute;top:0;bottom:0;border-left:3px solid;font-size:12px;padding:0 6px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;color:var(--ink)}
+.seg.r{border-color:var(--restrict);background:color-mix(in srgb,var(--restrict) 20%,var(--surface))}
+.seg.p{border-color:var(--partial);background:color-mix(in srgb,var(--partial) 22%,var(--surface))}
+.seg.c{border-color:var(--clear);background:color-mix(in srgb,var(--clear) 18%,var(--surface))}
+.seg.h{border-color:var(--hold);background:color-mix(in srgb,var(--hold) 16%,var(--surface))}
+.nowline{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--accent);z-index:2;pointer-events:none}
+.nowlabel{position:relative;height:20px;margin-left:132px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.nowlabel span{position:absolute;white-space:nowrap}
+.ticks{position:relative;height:22px;margin-left:132px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.ticks span.last{transform:translateX(-100%)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:10px 0 0 132px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+
+details.ph{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+details.ph[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+details.ph.current{box-shadow:inset 4px 0 0 var(--accent)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px}
+summary::-webkit-details-marker{display:none}
+.pn{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent);text-align:center}
+.pt{font-weight:600}
+.pw{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.chip.now{color:var(--accent);border-color:var(--accent);font-weight:600}
+.chip.done{color:var(--clear);border-color:color-mix(in srgb,var(--clear) 50%,transparent)}
+.chip.up{color:var(--muted);border-color:var(--line)}
+.body{padding:0 16px 18px 80px}
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;margin:4px 0 18px}
+.limits > div{border-top:2px solid var(--line);padding-top:8px;min-width:0}
+.limits > div.r{border-color:var(--restrict)}.limits > div.p{border-color:var(--partial)}.limits > div.c{border-color:var(--clear)}.limits > div.h{border-color:var(--hold)}
+.limits .k{font-size:12px;color:var(--muted)}
+.limits .v{font-size:14px;font-weight:500}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0;max-width:74ch}
+.grp{margin-bottom:12px}
+.grp b{display:block;font-size:14px;font-weight:600;margin-bottom:2px}
+.grp ul{font-size:15px}
+.crit{list-style:none;padding:0}
+.crit li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.crit li:last-child{border-bottom:0}
+.crit input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:none}
+.crit label{cursor:pointer}
+.crit input:checked + label{color:var(--muted);text-decoration:line-through}
+.progress{font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--sans);font-weight:400}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;font-size:13px;color:var(--muted)}
+td.d{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr.past td{color:var(--muted)}
+tr.soon td.s{color:var(--accent);font-weight:600}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.cards > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.cards h3{margin:0 0 8px;font-size:16px}
+.cards ul{font-size:14px}
+.flags{margin-top:38px;background:color-mix(in srgb,var(--restrict) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--restrict) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.flags h2{margin:0 0 8px;color:var(--restrict);font-size:19px}
+.flags ul{font-size:14.5px}
+.review{margin-top:38px;background:color-mix(in srgb,var(--hold) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--hold) 35%,var(--line));border-radius:12px;padding:16px 20px}
+.review h2{margin:0 0 4px;color:var(--hold);font-size:19px}
+.review p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.review ul{font-size:14.5px}
+.foot{font-size:13px;color:var(--muted);margin-top:28px;max-width:76ch}
+
+/* ---------- Patient snapshot ---------- */
+#snapshot{max-width:820px;margin:0 auto;padding:24px 20px 60px}
+.sn-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.sn-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;align-items:flex-end;border-bottom:2px solid var(--accent);padding-bottom:12px}
+.sn-top h1{font-size:clamp(22px,4vw,30px);max-width:none}
+.sn-top .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sn-meta{font-size:14px;color:var(--muted);text-align:right;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sn-meta b{color:var(--ink)}
+.sn-name{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;color:var(--muted)}
+.sn-name input{max-width:320px}
+.steps{display:flex;gap:4px;margin:18px 0 6px}
+.steps .s{flex:1;min-width:0}
+.steps .s .b{height:8px;border-radius:99px;background:var(--line)}
+.steps .s.done .b{background:var(--clear)}
+.steps .s.cur .b{background:var(--accent);height:12px;margin-top:-2px}
+.steps .s .l{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+.steps .s.cur .l{color:var(--ink);font-weight:600}
+.sn-where{margin-top:14px}
+.sn-where .ph{font-family:var(--serif);font-size:24px;font-weight:600}
+.sn-where .when{font-size:13px;color:var(--muted);margin-bottom:6px}
+.sn-where p{margin:6px 0 0;font-size:16px;max-width:64ch}
+.sn-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:14px}
+.sn-nums > div{background:var(--paper);padding:10px 12px}
+.sn-nums .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sn-nums .v{font-size:15px;font-weight:600;margin-top:2px}
+.sn-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:16px}
+.sn-box{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sn-box h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600}
+.sn-box.do{border-top:3px solid var(--clear)}
+.sn-box.avoid{border-top:3px solid var(--restrict)}
+.sn-box.goals{border-top:3px solid var(--accent)}
+.sn-box.next{border-top:3px solid var(--partial)}
+.sn-box ul{font-size:14.5px}
+.sn-goals{list-style:none;padding:0}
+.sn-goals li{display:flex;gap:9px;align-items:flex-start}
+.sn-goals input{width:17px;height:17px;margin-top:3px;accent-color:var(--accent);flex:none}
+.sn-call{margin-top:16px;border:1px solid color-mix(in srgb,var(--restrict) 40%,var(--line));background:color-mix(in srgb,var(--restrict) 6%,var(--surface));border-radius:10px;padding:12px 14px}
+.sn-call h3{font-size:15px;margin:0 0 6px;font-family:var(--sans);font-weight:600;color:var(--restrict)}
+.sn-call ul{font-size:14px}
+.sn-foot{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 14px;margin-top:16px;font-size:13px;color:var(--muted)}
+.sn-foot label{display:block;margin-bottom:2px}
+.sn-disc{font-size:12px;color:var(--muted);margin-top:14px}
+
+@media (max-width:640px){
+  header{grid-template-columns:1fr}
+  .controls{min-width:0}
+  .lane{grid-template-columns:1fr;gap:4px}
+  .ticks,.legend,.nowlabel{margin-left:0}
+  .body{padding:0 14px 16px 14px}
+  summary{grid-template-columns:40px minmax(0,1fr)}
+  summary .chip{grid-column:2;justify-self:start}
+  .seg{font-size:11px;padding:0 3px}
+  .sn-meta{text-align:left;margin-left:0;white-space:normal}
+  .today{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .steps .s .l{display:none}
+  .steps .s.cur .l{display:block}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+@media print{
+  @page{size:letter;margin:.5in}
+  :root:root:root{--paper:#fff;--surface:#fff;--ink:#111;--muted:#444;--line:#cfd6d4;--accent:#0B6E6E;--restrict:#A8432A;--partial:#A87313;--clear:#3D7A3F;--hold:#6B5B95;color-scheme:light}
+  html,body{background:#fff;color:#111;font-size:12.5px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .noprint,.modebar,.controls .selbox,.tools,.example{display:none!important}
+  body.snap #clinician{display:none!important}
+  body:not(.snap) #snapshot{display:none!important}
+  details.ph{break-inside:avoid-page}
+  #snapshot{padding:0;max-width:none}
+  .sn-card{border:0;padding:0}
+  .sn-name input,.sn-foot input{border:0;border-bottom:1px solid #999;border-radius:0;padding:2px 0;background:transparent}
+  /* one-page snapshot: tighten spacing, keep the content */
+  #snapshot{font-size:11.5px;line-height:1.4}
+  .sn-top{padding-bottom:8px}
+  .sn-top h1{font-size:21px}
+  .sn-name{margin-top:8px;font-size:12px}
+  .steps{margin:10px 0 2px}
+  .steps .s .l{font-size:9px}
+  .sn-where{margin-top:8px}
+  .sn-where .ph{font-size:18px}
+  .sn-where .when{margin-bottom:2px;font-size:11px}
+  .sn-where p{font-size:12px;margin-top:2px}
+  .sn-nums{margin-top:8px}
+  .sn-nums > div{padding:6px 9px}
+  .sn-nums .v{font-size:12.5px}
+  .sn-two{gap:10px;margin-top:10px}
+  .sn-box{padding:8px 10px}
+  .sn-box h3{font-size:12.5px;margin-bottom:3px}
+  .sn-box ul,.sn-call ul{font-size:11.5px}
+  .sn-box li,.sn-call li{margin:1px 0}
+  .sn-call{margin-top:10px;padding:8px 10px}
+  .sn-call h3{font-size:12.5px;margin-bottom:3px}
+  .sn-foot{margin-top:10px;gap:8px 12px;font-size:11px}
+  .sn-disc{margin-top:8px;font-size:10px}
+  .sn-box,.sn-call,.sn-nums{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div id="clinician">
+<div class="wrap">
+<header>
+  <div>
+    <h1 id="title"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="modebar noprint">
+      <button type="button" class="primary" id="openSnap">Patient snapshot</button>
+      <button type="button" id="linkBtn">Copy patient link</button>
+      <div id="linkBox" hidden style="flex-basis:100%;margin-top:8px"></div>
+      <button type="button" id="printClin">Print protocol</button>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="datebox">
+      <label for="sx">Date of surgery</label>
+      <input type="date" id="sx">
+      <div class="weekread" id="weekread"></div>
+      <div class="example" id="example" hidden>Example date shown. Enter the patient's surgery date.</div>
+    </div>
+    <div id="selectors"></div>
+  </div>
+</header>
+
+<div id="banners"></div>
+<div class="todayhead" id="todayhead"></div>
+<div class="today" id="today"></div>
+<div class="nextup" id="nextup"></div>
+<div id="standing"></div>
+
+<h2>Restriction timeline</h2>
+<div class="tl">
+  <div class="nowlabel" id="nowlabel"></div>
+  <div id="lanes"></div>
+  <div class="ticks" id="ticks"></div>
+  <div class="legend">
+    <span><i style="background:var(--restrict)"></i>Protected</span>
+    <span><i style="background:var(--partial)"></i>Progressing</span>
+    <span><i style="background:var(--clear)"></i>Cleared with criteria</span>
+    <span><i style="background:var(--hold)"></i>Not yet</span>
+  </div>
+</div>
+
+<h2>Phases</h2>
+<div class="tools">
+  <button type="button" id="expand">Expand all</button>
+  <button type="button" id="collapse">Collapse all</button>
+  <button type="button" id="reset">Clear checkboxes</button>
+</div>
+<div id="phases" style="margin-top:12px"></div>
+
+<div id="keydates-wrap">
+  <h2>Key dates</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Milestone</th><th>Protocol timing</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody id="dates"></tbody>
+  </table></div>
+</div>
+
+<div id="extras"></div>
+<section class="flags" id="flags" hidden><h2>When to call the surgeon</h2><ul id="flagsList"></ul></section>
+<section class="review" id="review" hidden>
+  <h2>Clinician review flags</h2>
+  <p>Places where the evidence is thin, sources disagree, or surgeon preference varies. Decide these before relying on the page.</p>
+  <ul id="reviewList"></ul>
+</section>
+<p class="foot" id="foot"></p>
+</div>
+</div>
+
+<div id="snapshot" hidden></div>
+
+<script>
+const PROTOCOL = /*PROTOCOL_JSON*/{"id":"rotator-cuff-repair","title":"Rotator cuff repair rehab","subtitle":"Built from two Ohio State Sports Medicine guidelines: small-medium rotator cuff repair (revised July 2022) and large-massive rotator cuff repair (December 2017). The two timelines were merged into one set of week bands. Check the review flags before using with a patient.","spanWeeks":26,"exampleWeek":7,"tickWeeks":[0,2,4,6,8,10,12,16,26],"tickLabels":{"26":"6mo"},"limitKeys":[["sling","Sling"],["rom","Motion"],["str","Strengthening"],["prec","Precautions"]],"selectors":[{"id":"tear","label":"Tear size","options":[{"id":"sm","label":"Small–medium"},{"id":"lm","label":"Large–massive","banner":"Large and massive repairs use a slower timeline: sling for 6 weeks, with formal PT progression starting at weeks 4 to 6. If a superior capsule reconstruction was done, follow the protocol timeframes and limit lifting to 5 lbs for 6 months."}]},{"id":"sub","label":"Subscapularis","options":[{"id":"std","label":"Not repaired"},{"id":"sub","label":"Repaired","banner":"Subscapularis precautions through week 12: no ER past 30°, no cross-body adduction, no active IR or IR behind the back, no weight through the arm (for example pushing up from a chair)."}]}],"standingPrecautionsTitle":"Rules that hold across phases","standingPrecautions":[{"sm":"Sling use is 4 to 6 weeks. Avoid AROM before 6 weeks. Correct scapular substitution during AA/AROM. Visits can start early; keep them protective","lm":"Sling use is 6 weeks. Guideline starts formal PT progression at weeks 4 to 6. No PROM into pain"},{"sm":"No behind-the-back stretching for 12 weeks","lm":"Large-massive risk factors listed: low preoperative function, poorer preoperative active ER, younger age, lower education level, workers' comp claim"},"Progression is time and criterion based, depending on soft tissue healing, patient demographics, and clinician evaluation"],"lanes":[{"name":"Sling","segs":[[0,2,"r",{"sm":"Sling","lm":"Sling"}],[2,4,"r",{"sm":"Sling","lm":"Sling"}],[4,6,"r",{"sm":"Sling→off","lm":"Sling"}],[6,8,"p",{"sm":"None","lm":"Off per MD"}],[8,10,"c",{"sm":"None","lm":"None"}],[10,12,"c",{"sm":"None","lm":"None"}],[12,16,"c",{"sm":"None","lm":"None"}],[16,26,"c",{"sm":"None","lm":"None"}]]},{"name":"Motion","segs":[[0,2,"r",{"sm":"Home","lm":"Home"}],[2,4,"r",{"sm":"PROM","lm":"Home"}],[4,6,"r",{"sm":"AAROM","lm":"PROM"}],[6,8,"p",{"sm":"AROM","lm":"AAROM"}],[8,10,"p",{"sm":"AROM","lm":"AROM"}],[10,12,"p",{"sm":"Full","lm":"AROM"}],[12,16,"c",{"sm":"Full","lm":"Full"}],[16,26,"c",{"sm":"Stretch","lm":"Stretch"}]]},{"name":"Strength","segs":[[0,2,"r",{"sm":"—","lm":"—"}],[2,4,"r",{"sm":"Scap","lm":"—"}],[4,6,"r",{"sm":"Isom","lm":"Scap"}],[6,8,"p",{"sm":"Prone","lm":"Isom"}],[8,10,"p",{"sm":"T-band","lm":"Prone"}],[10,12,"p",{"sm":"Dumbbell","lm":"UBE+"}],[12,16,"p",{"sm":"Dumbbell","lm":"T-band"}],[16,26,"c",{"sm":"Sport","lm":"Dumbbell"}]]}],"phases":[{"key":"p1","num":"1","name":"Home program","range":"Weeks 0–2","start":0,"end":2,"limits":{"sling":{"sm":["r","Sling on"],"lm":["r","Sling on (6 weeks)"]},"rom":{"sm":["r","Protect the repair. Home exercises as your surgeon directed. Early visits focus on protection and education"],"lm":["r","Home exercises: wrist and hand, pendulums, scapular squeezes"]},"str":{"sm":["r","None yet. Home exercises only"],"lm":["r","None yet. Home exercises only"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["p","Follow surgeon restrictions. Early visits stay protective"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Protect the repair in the sling and follow the home program. Early visits focus on protection and education.","lm":"Protect the repair in the sling and follow the home program. Early visits focus on protection and education."},"groups":{"sm":[["Continue home program",["Post-op home exercises as the surgeon directed","Early visits (as soon as day 1 after surgery) focus on protecting the repair, education, and the home program"]]],"lm":[["Home program",["Continue post-op home exercises: wrist and hand, pendulums, scapular squeezes"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Following the surgeon's home program","lm":"Following the surgeon's home program"},{"sm":"Sling use understood and followed","lm":"Sling use understood and followed"},{"sm":"Precautions and home program taught","lm":"Precautions and home program taught"}],"patient":{"title":"Protect your shoulder","short":"Home","summary":"Your repaired tendon is just starting to heal. These first weeks are about protecting it, wearing your sling as directed, and doing only the exercises your surgeon gave you.","numbers":[["Sling",{"sm":"Wear as instructed","lm":"Wear as instructed (about 6 weeks)"}],["Arm motion",{"sm":"Home exercises only","lm":"Home exercises only"}],["Strength work",{"sm":"None yet","lm":"None yet"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Wear your sling as your surgeon instructed","Do your hand, wrist, and elbow exercises as shown","Do your pendulums and shoulder blade squeezes as shown","Keep ice and pain control going","Keep your appointments"],"avoid":["Lifting your arm on your own","Reaching, pulling, or pushing with that arm","Carrying anything with that arm",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Pain is under control","You can follow your home program on your own","You know your precautions and your exercises"],"next":"Over the next weeks your therapist adds gentle motion work, always protecting the repair. Dates are targets that depend on how you are doing."}},{"key":"p2","num":"2","name":"Early protection","range":"Weeks 2–4","start":2,"end":4,"limits":{"sling":{"sm":["r","Sling on"],"lm":["r","Sling on (6 weeks)"]},"rom":{"sm":["r","Passive only: flexion and ER first; abduction and IR as tolerated; caudal glides"],"lm":["r","Home exercises: wrist and hand, pendulums, scapular squeezes"]},"str":{"sm":["r","Scapular retraction and protraction; supine serratus punches; light scapular resistance late in phase"],"lm":["r","None yet. Home exercises only"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["p","Follow surgeon restrictions. Early visits stay protective"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Guideline PT progression starts: passive motion, manual work, and scapular control while the repair stays in the sling.","lm":"Still on the home program and in the sling. Formal PT progression starts at weeks 4 to 6."},"groups":{"sm":[["Manual",["Caudal glenohumeral glides; PROM flexion and ER; soft tissue work","Grade II to III posterior and caudal mobilizations; scapular mobilizations"]],["Motion",["Add PROM abduction and IR (PROM only) per tolerance","Pectoralis minor flexibility: supine postural stretch","Seated wand ER and flexion (if not contraindicated)","Unaffected-side UBE only; affected arm stays in the sling"]],["Strength",["Isotonic scapular retraction and protraction: supine serratus punches, side-lying PNF (scapular clock), sitting retraction","Late phase: light scapular stabilization (scap squeezes, extension with light resistance)"]],["Modalities",["Ice and pain modalities as needed"]]],"lm":[["Home program",["Continue post-op home exercises: wrist and hand, pendulums, scapular squeezes","Early visits focus on protection and education. The guideline starts formal PT progression (manual work, PROM) at weeks 4 to 6"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Pain decreasing","lm":"Following the home program"},{"sm":"Full passive motion supine","lm":"Pain controlled"},{"sm":"Sleeping through the night","lm":"Sling use understood and followed"},{"sm":"Normal posture","lm":"Precautions and home program taught"}],"patient":{"title":"Early protection","short":"Protect","summary":"You stay in the sling while healing continues. Your therapist moves your arm for you and may start shoulder blade work.","numbers":[["Sling",{"sm":"Wear as instructed","lm":"Wear as instructed (about 6 weeks)"}],["Arm motion",{"sm":"Therapist moves your arm for you","lm":"Home exercises only"}],["Strength work",{"sm":"Shoulder blade work only","lm":"None yet"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Wear your sling as your surgeon instructed","Do your home exercises as shown","Work on good posture","Keep ice and pain control going"],"avoid":["Lifting your arm on your own","Reaching, pulling, or pushing with that arm",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Pain keeps going down","Sleep through the night","Good posture"],"next":"Your sling may come off soon, and your therapist will add more motion. Dates are targets that depend on how you are doing."}},{"key":"p3","num":"3","name":"Protected motion","range":"Weeks 4–6","start":4,"end":6,"limits":{"sling":{"sm":["p","Sling until your surgeon stops it (weeks 4 to 6)"],"lm":["r","Sling on (6 weeks)"]},"rom":{"sm":["p","Assisted motion (AAROM) in all directions as tolerated. No active motion before week 6"],"lm":["r","Passive only: flexion and ER. Do not push into pain. Wand ER, and flexion if the surgeon allows"]},"str":{"sm":["p","Submax isometrics (flexion, extension, abduction, ER, IR, lower trap); walk-outs; closed chain oscillations"],"lm":["r","Scapular retraction and protraction; light scapular stabilization (rows, pulldowns)"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["p","No passive motion into pain"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Sling comes off per the surgeon. Assisted motion and submax isometrics begin. No active motion before week 6.","lm":"Formal PT progression starts: passive flexion and ER only, scapular strengthening, no pushing into pain."},"groups":{"sm":[["Sling",["Discontinue per physician"]],["Motion",["AAROM in all motions, adding abduction, IR, horizontal abduction (keep subscapularis precautions)","Ball on wall, Swiss ball mobility for IR and ER","Towel wipes on table in any direction"]],["Strength",["Submax isometrics: flexion, extension, abduction, ER, IR; isometric lower trap","Dynamic isometric walk-outs","Closed chain stability: elbow extension with hand on ball or table, oscillations or small pain-free weight shifts","Progress scapular neuromuscular strengthening"]]],"lm":[["Manual",["Posterior and caudal glenohumeral mobilizations (grade II to III)","Scapular mobilization; soft tissue work as appropriate","Pectoralis minor flexibility: supine postural stretch, therapist overpressure"]],["Motion",["PROM in flexion and ER only. Do not push into pain","Seated wand ER; wand flexion with physician authorization"]],["Strength",["Isotonic scapular retraction and protraction: serratus punches, side-lying PNF (scapular clock), sitting retraction","Manual-resistance scapular stabilization (sitting, side-lying); light rows and pulldowns"]],["Modalities",["Ice and pain modalities as needed"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Full PROM supine","lm":"Pain decreasing"},{"sm":"Sleeping through the night","lm":"Full passive motion supine"},{"sm":"Normal posture","lm":"Sleeping through the night"},{"sm":"Sling stopped per physician","lm":"Normal posture"}],"patient":{"title":"Protected motion","short":"Motion","summary":"Your motion work grows, but your muscles still do not lift the arm on their own. Light muscle tightening starts, with no movement.","numbers":[["Sling",{"sm":"Wear until your surgeon stops it (weeks 4 to 6)","lm":"Wear as instructed (about 6 weeks)"}],["Arm motion",{"sm":"Therapist helps you move your arm. No lifting on your own","lm":"Therapist moves your arm (forward and outward turn only)"}],["Strength work",{"sm":"Light muscle tightening, no movement","lm":"Shoulder blade work only"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Do the motion exercises your therapist shows you","Work on shoulder blade control","Keep up good posture","Sleep as comfortably as you can, per your therapist's tips"],"avoid":["Lifting your arm on your own","Lifting or carrying objects with that arm",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Move your arm passively through your full range","Sleep through the night","Keep a normal posture"],"next":"Starting around week 6 you begin to lift your arm on your own, with your surgeon's approval."}},{"key":"p4","num":"4","name":"Active motion begins","range":"Weeks 6–8","start":6,"end":8,"limits":{"sling":{"sm":["c","No sling"],"lm":["p","Sling stopped per physician (weeks 6 to 8)"]},"rom":{"sm":["p","Active motion (AROM) as tolerated. Avoid scapular substitution"],"lm":["p","Assisted motion (AAROM) per tolerance, adding abduction and horizontal abduction"]},"str":{"sm":["p","Light UBE with both arms; prone rows and extension below shoulder level; wall towel wipes; quadruped weight shifts"],"lm":["p","Submax (50% effort) isometrics; closed chain oscillations; lower trap"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["p","No passive motion into pain"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Active motion starts and strengthening adds UBE and prone work.","lm":"Sling comes off per the surgeon. Assisted motion and submax isometrics begin."},"groups":{"sm":[["Motion",["AROM per tolerance. Avoid scapular substitution"]],["Strength",["Light UBE using both arms","Prone extension and rows below shoulder level","Closed chain: towel wipes on wall (horizontal, diagonal, vertical), serratus punches, quadruped weight shifts","Proprioception work, supine ABCs, ball on wall"]]],"lm":[["Sling",["Discontinue per physician"]],["Motion",["AAROM per tolerance, adding abduction and horizontal abduction (keep subscapularis precautions)","Ball on wall, Swiss ball mobility for IR and ER","Towel wipes on table in any direction"]],["Strength",["Closed chain stability: elbow extension with hand on ball, oscillations","Scapular neuromuscular strengthening","Submax (50% effort) isometrics: flexion, extension, abduction, ER, IR, lower trap"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Full AROM goal, no scapular substitution","lm":"Sling stopped per physician"},{"sm":"No reactive inflammation with strengthening","lm":"No reactive inflammation with isometrics"},{"sm":"Return toward full ADLs pain free","lm":"Return toward ADLs within precautions"}],"patient":{"title":"Active motion begins","short":"Active","summary":"The sling is off or coming off, and you begin using your own muscles to move the arm, with light exercise.","numbers":[["Sling",{"sm":"Off","lm":"Off when your surgeon says (weeks 6 to 8)"}],["Arm motion",{"sm":"You start lifting your arm on your own","lm":"Therapist helps you move your arm"}],["Strength work",{"sm":"Light bike (UBE), light back exercises","lm":"Light muscle tightening, no movement"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Practice lifting your arm as your therapist shows you","Use the light arm bike (UBE) if your therapist says it is okay","Keep your shoulder blade steady while you lift","Do your wall and table exercises as shown"],"avoid":["Heavy lifting","Shrugging your shoulder to lift your arm",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Lift your arm without shrugging","No flare-up with your exercises","Do light daily tasks without pain"],"next":"Weeks 8 to 12 build motion and control. Dates are targets that depend on how you are doing."}},{"key":"p5","num":"5","name":"Building control","range":"Weeks 8–10","start":8,"end":10,"limits":{"sling":{"sm":["c","No sling"],"lm":["c","No sling"]},"rom":{"sm":["p","Active motion toward full, no scapular substitution"],"lm":["p","Active motion per tolerance. Avoid scapular substitution"]},"str":{"sm":["p","Moderate UBE; light T-band; prone T and Y; rhythmic stabilization from 90 to 100°"],"lm":["p","Light UBE; prone row and extension, no weight, below shoulder level; wall towel wipes; quadruped weight shifts"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["c","None listed"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Work toward full active motion without scapular substitution. T-band and rhythmic stabilization begin.","lm":"Active motion starts, with UBE and prone work without weight."},"groups":{"sm":[["Strength",["Moderate UBE","Light T-band: IR and ER, horizontal abduction and adduction, diagonal patterns","Progress prone program: rows, extension, horizontal abduction (T), lower trap (Y)","Rhythmic stabilization supine from the balance point (90 to 100° elevation); progress to side-lying, prone, standing"]]],"lm":[["Motion",["AROM per tolerance. Avoid scapular substitution"]],["Strength",["Light UBE","Prone row and extension, no weight, below shoulder level","Closed chain: wall towel wipes, quadruped weight shifts","Continue scapular strengthening"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Full active motion","lm":"Active motion improving without scapular substitution"},{"sm":"No scapular (trapezius) substitution","lm":"No reactive inflammation with strengthening"},{"sm":"No reactive inflammation with strengthening","lm":"Progressing prone and closed chain work"}],"patient":{"title":"Building control","short":"Control","summary":"You work toward lifting your arm fully, with good shoulder blade control, and add light resistance work.","numbers":[["Sling",{"sm":"Off","lm":"Off"}],["Arm motion",{"sm":"Working toward full motion","lm":"You start lifting your arm on your own"}],["Strength work",{"sm":"Light bands, back and shoulder blade work","lm":"Light bike (UBE), light back exercises"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Work on lifting your arm with a steady shoulder blade","Use light bands or the arm bike as your therapist shows you","Do your prone (face-down) exercises as shown","Keep up your posture work"],"avoid":["Heavy lifting","Pushing into sharp pain","Rushing to heavier weights",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Lift your arm fully without shrugging","No soreness lasting after exercise","Return to daily tasks pain free"],"next":"Weeks 10 to 12 build strength. Dates are targets that depend on how you are doing."}},{"key":"p6","num":"6","name":"Strength base","range":"Weeks 10–12","start":10,"end":12,"limits":{"sling":{"sm":["c","No sling"],"lm":["c","No sling"]},"rom":{"sm":["c","Full active motion"],"lm":["p","Continue active motion. Add gentle IR stretching"]},"str":{"sm":["p","Progressive dumbbell program, high reps and low weight; functional eccentric loads"],"lm":["p","Moderate UBE; isometrics; walk-outs; prone work with no weight; serratus punches"]},"prec":{"std":{"sm":["p","No stretching behind the back until week 12"],"lm":["c","None listed"]},"sub":{"sm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"],"lm":["r","No ER past 30°, no cross-body adduction, no active IR or IR behind the back, and no weight through the arm (for example pushing up from a chair), through week 12"]}}},"focus":{"sm":"Full active motion without scapular substitution should be reached. Dumbbell program begins.","lm":"Continue active motion and add gentle IR stretching. Moderate UBE and isometrics."},"groups":{"sm":[["Strength",["Progress prone program","Dumbbell program, high reps and low weight: scaption, diagonal patterns, bent row, prone retraction with ER","Functional positions with eccentric loads","Closed chain: push-up with a plus, Swiss ball, plank with BOSU weight shifts","Trunk and lower extremity strengthening"]]],"lm":[["Motion",["Continue AROM","Add gentle IR stretching"]],["Strength",["Moderate UBE","Isometrics; dynamic isometric walk-outs","Prone row and extension, no weight","Closed chain: seated press-up, serratus punches","Proprioception: ball on wall, supine ABCs"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Full AROM with no scapular substitution (weeks 10 to 12)","lm":"Full AROM with no scapular substitution (weeks 10 to 12)"},{"sm":"No reactive inflammation with strengthening","lm":"No reactive inflammation with strengthening"},{"sm":"Subscapularis precautions end at week 12 (if repaired)","lm":"Subscapularis precautions end at week 12 (if repaired)"}],"patient":{"title":"Strength base","short":"Base","summary":"You should be close to full motion on your own. Strength work builds, and your extra rules end at week 12 if you had one.","numbers":[["Sling",{"sm":"Off","lm":"Off"}],["Arm motion",{"sm":"Full motion goal","lm":"Active motion improving"}],["Strength work",{"sm":"Light weights, many reps","lm":"More muscle control work"}],["Extra rules",{"std":{"sm":"No stretching with your arm behind your back until week 12","lm":"Do not push your motion into pain"},"sub":{"sm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12","lm":"No turning your arm outward past 30°, no reaching across your body, no pushing up with that arm, until week 12"}}]],"do":["Keep working on full motion","Do the strength exercises as shown","Keep up posture and shoulder blade work","Watch for soreness that lingers"],"avoid":["Heavy lifting","Rushing weights","Pushing into sharp pain",{"std":"Pushing your arm into pain","sub":"Turning your arm outward past 30°, reaching across your body, or pushing up with that arm (until week 12)"}],"goals":["Full motion without shrugging","No flare-up with strengthening","Daily tasks without pain"],"next":"Weeks 12 to 16 add more resistance and stronger exercises."}},{"key":"p7","num":"7","name":"Strengthening","range":"Weeks 12–16","start":12,"end":16,"limits":{"sling":{"sm":["c","No sling"],"lm":["c","No sling"]},"rom":{"sm":["c","Full active motion"],"lm":["c","Full active motion goal"]},"str":{"sm":["p","Progressive dumbbell program, high reps and low weight; functional eccentric loads"],"lm":["p","T-band; prone work with weight; rhythmic stabilization; eccentric decelerations; closed chain"]},"prec":{"std":{"sm":["c","None listed"],"lm":["c","None listed"]},"sub":{"sm":["c","Subscapularis precautions ended at week 12"],"lm":["c","Subscapularis precautions ended at week 12"]}}},"focus":{"sm":"Continue the dumbbell and functional program. Short toss may start per physician release.","lm":"T-band, prone work with weight, eccentric work, and closed chain strengthening."},"groups":{"sm":[["Strength",["Same as weeks 10 to 12","Short toss and overhead endurance activities per physician release"]]],"lm":[["Strength",["T-band: IR and ER, horizontal abduction and adduction, diagonal patterns","Prone program with weight: row, extension, horizontal abduction (T), lower trap (Y)","Rhythmic stabilization supine from the balance point (90 to 100° elevation); progress to side-lying, prone, standing","Functional eccentric work: decelerations","Closed chain: push-up with a plus, Swiss ball, plank with BOSU weight shifts","Trunk and lower extremity strengthening"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Progressing the dumbbell program","lm":"Progressing T-band and prone work"},{"sm":"5/5 rotator cuff strength","lm":"5/5 rotator cuff strength"},{"sm":"65 to 70% IR/ER isokinetic result (target)","lm":"65 to 70% IR/ER isokinetic result (target)"}],"patient":{"title":"Strengthening","short":"Strong","summary":"Strength work gets harder, with weights, bands, and more demanding positions.","numbers":[["Sling",{"sm":"Off","lm":"Off"}],["Arm motion",{"sm":"Full motion","lm":"Full motion goal"}],["Strength work",{"sm":"Light weights, many reps","lm":"Bands and light weights"}],["Extra rules",{"std":{"sm":"No extra rules","lm":"No extra rules"},"sub":{"sm":"Your extra rules have ended","lm":"Your extra rules have ended"}}]],"do":["Do your weights and band exercises as shown","Do your push-up and ball exercises as shown","Keep working your trunk and legs too","Keep stretching gently"],"avoid":["Going heavier than your therapist allows","Overhead sport or throwing before you are cleared","Pushing into sharp pain"],"goals":["Strong rotator cuff with no pain","No soreness lasting after exercise","Be ready for sport-specific training"],"next":"Months 4 to 6 focus on return to activity and sport. Dates are targets."}},{"key":"p8","num":"8","name":"Return to activity","range":"Months 4–6","start":16,"end":26,"limits":{"sling":{"sm":["c","No sling"],"lm":["c","No sling"]},"rom":{"sm":["c","Full motion. Stretch posterior capsule"],"lm":["c","Full motion. Stretch posterior capsule"]},"str":{"sm":["c","Progress T-band and dumbbell work; eccentric work; throwing progression"],"lm":["c","Progress T-band and dumbbell work; eccentric work; throwing progression"]},"prec":{"std":{"sm":["c","None listed"],"lm":["c","None listed"]},"sub":{"sm":["c","Subscapularis precautions ended at week 12"],"lm":["c","Subscapularis precautions ended at week 12"]}}},"focus":{"sm":"Posterior capsule stretching, strength progression, and throwing progression toward return to sport.","lm":"Posterior capsule stretching, strength progression, and throwing progression. The return-to-sport goal is about 6 months."},"groups":{"sm":[["Motion",["Posterior capsule stretching","General flexibility (pectorals, biceps, upper trapezius, etc.)"]],["Strength",["Progress T-band, prone program with weight, dumbbell program with weight","Functional eccentric strengthening","Closed chain: push-up with a plus, Swiss ball","Trunk and lower extremity strengthening, endurance work","Throwing progression (OSU Sports Medicine Throwing Program, not provided)"]]],"lm":[["Motion",["Posterior capsule stretching","General stretching and flexibility"]],["Strength",["Progress T-band and dumbbell program: scaption, diagonal patterns, bent row, prone retraction with ER","Functional eccentric strengthening","Closed chain: push-up with a plus, Swiss ball","Trunk and lower extremity strengthening","Throwing progression (OSU Sports Medicine Throwing Program, not provided)","Short toss and overhead endurance activities per physician release"]]]},"gateTitle":"Criteria to progress","criteria":[{"sm":"Completion of throwing progression","lm":"Completion of throwing progression"},{"sm":"No reactive effusion, pain, or instability","lm":"No reactive effusion, pain, or instability"},{"sm":"65 to 70% IR/ER isokinetic testing","lm":"65 to 70% IR/ER isokinetic testing"},{"sm":"Full AROM and 5/5 cuff strength; discharge criteria met","lm":"Full functional mobility and strength; return to sport target about 6 months"}],"patient":{"title":"Return to activity","short":"Return","summary":"You are building toward your goals, including work tasks and sport, and for throwers a step-by-step throwing program. Your surgeon and therapist decide when you are cleared.","numbers":[["Sling",{"sm":"Off","lm":"Off"}],["Arm motion",{"sm":"Full motion and stretching","lm":"Full motion and stretching"}],["Strength work",{"sm":"Progressing weights and throwing steps","lm":"Progressing weights and throwing steps"}],["Extra rules",{"std":{"sm":"No extra rules","lm":"No extra rules"},"sub":{"sm":"Your extra rules have ended","lm":"Your extra rules have ended"}}]],"do":["Follow your therapist's strength and stretching plan","Follow the throwing program step by step if you are a thrower","Keep up trunk and leg strength","Report any flare-up of pain or swelling"],"avoid":["Jumping straight into full sport","Skipping your warm-up","Pushing through pain"],"goals":["Full motion and strength","No pain or swelling with sport","Finish your throwing steps (if needed)"],"next":"Your surgeon and therapist will confirm when you are fully cleared. Dates are targets that depend on how you are doing."}}],"keyDates":[{"label":"Guideline PT progression starts (small–medium)","when":"Week 2","week":2},{"label":"Guideline PT progression starts (large–massive)","when":"Weeks 4 to 6","week":4},{"label":"Sling off (small–medium)","when":"Weeks 4 to 6, per physician","week":4},{"label":"Sling off (large–massive)","when":"Weeks 6 to 8, per physician","week":6},{"label":"Subscapularis precautions end (if repaired)","when":"Week 12","week":12,"patient":"If your surgeon repaired the subscapularis, your extra rules end around this time"},{"label":"Throwing progression and sport phase","when":"Months 4 to 6","months":4},{"label":"Return to sport target (large–massive)","when":"About 6 months","months":6}],"extrasTitle":"Other guideline items","extras":[{"title":"Biceps tenodesis (small–medium guideline)","items":["No ER past 40° and limit shoulder extension in the frontal and sagittal planes for 4 weeks","No extension or horizontal abduction for 4 to 6 weeks","No resisted elbow flexion, shoulder flexion, or supination for 6 weeks"]},{"title":"About PT start timing","items":["Patients can be seen as early as the day after surgery. Early visits stay conservative and protect the repair: sling, education, and home program","The guideline start points (week 2 small-medium, weeks 4 to 6 large-massive) mark when formal progression begins: PROM and manual work"]},{"title":"Outcomes and discharge","items":["Outcome measures: DASH or QuickDASH","Discharge: full AROM with no scapular substitution, 5/5 rotator cuff strength, 65 to 70% IR/ER isokinetic testing (as a percent of the other arm)","Corrective interventions in both guidelines: pain and edema control, manual work, therapeutic exercise and neuromuscular re-education, return-to-work simulation, sport-specific training"]}],"reviewFlags":[{"item":"Licensing of the source documents","why":"Both PDFs are marked 'For OSUWMC use only. To license, please contact the OSU Technology Commercialization Office.' This page restates their content in new wording on a public site. Confirm you have permission, or keep this page internal and do not send patient links, before publishing."},{"item":"Merged timelines","why":"The two guidelines use different week bands, so they were combined into 8 bands. For each tear size, the limits are the guideline's own, placed in the nearest band. Check the bands against how you count weeks."},{"item":"Large-massive guideline is older","why":"It was completed December 2017. The small-medium guideline was revised July 2022 (the file name says 2020). Ask whether a newer large-massive version exists."},{"item":"Small-medium PROM conflict","why":"The manual therapy section says PROM is flexion and ER only for weeks 2 to 4. Phase 1 says begin PROM abduction per tolerance and IR PROM. This page lists flexion and ER first with abduction and IR as tolerated."},{"item":"Garbled small-medium goals","why":"Phase 3 goals read 'Full active ROM / Trapezius substitution / Reactive inflammation' and the phase 4 box mixes criteria into the strengthening list. This page reads them as 'no trapezius substitution' and 'no reactive inflammation'. Confirm."},{"item":"Sling wear","why":"Neither guideline says how many hours a day the sling is worn or when it can come off for exercises. Patient text says 'wear as instructed'."},{"item":"Biceps tenodesis and SCR","why":"Biceps tenodesis rules (small-medium) and superior capsule reconstruction rules (large-massive) are listed as notes, not selectors. The subscapularis repair has its own selector."},{"item":"Home exercises in weeks 0 to 2","why":"The small-medium guideline does not name the home exercises. The large-massive guideline names wrist and hand, pendulums, and scapular squeezes."},{"item":"Throwing program not provided","why":"Both guidelines refer to the OSU Sports Medicine Throwing Program. It is not included here."},{"item":"Patient wording and call list","why":"Plain-language text and the call list are standard practice, not quoted from the guidelines. Reconcile with the surgeon's own handout."}],"callSurgeon":["Sudden sharp pain, a pop, or a new loss of the ability to lift the arm","Wound redness, drainage, warmth, or fever","New numbness, tingling, or color change in the hand","Calf pain or swelling, or shortness of breath","Pain or swelling that keeps increasing as the program progresses"],"patient":{"title":"Your shoulder recovery: rotator cuff repair","callIf":["A sudden sharp pain or pop, or you suddenly cannot lift your arm","A wound that is red, hot, leaking, or opening, or a fever","New numbness, tingling, or a color change in your hand","Calf pain, swelling, or warmth. Call 911 for chest pain or trouble breathing","Pain or swelling that keeps getting worse"]},"sources":[{"title":"OSU Wexner Medical Center Sports Medicine. Small-Medium Rotator Cuff Repair Guideline (revised July 2022)","note":"Provided by Drew. Marked for OSUWMC use only"},{"title":"OSU Wexner Medical Center Sports Medicine. Large-Massive Rotator Cuff Repair Guideline (Salsbery and Ingle, completed December 2017)","note":"Provided by Drew. Marked for OSUWMC use only"}]}/*END_PROTOCOL_JSON*/;
+
+(function(){
+const P=PROTOCOL, DAY=86400000, SPAN=P.spanWeeks, SEL=P.selectors||[];
+const BRK=(P.timeScale&&P.timeScale.breakWeek)||12, BRKP=(P.timeScale&&P.timeScale.breakPct)||55;
+const PFX=(P.id||"protocol")+"-";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function store(k,v){try{v===null?localStorage.removeItem(PFX+k):localStorage.setItem(PFX+k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(PFX+k)}catch(e){return null}}
+
+/* ---------- link parameters: ?s=YYYY-MM-DD&<selectorId>=<optionId> opens the patient view; add &c=1 for the clinician view ---------- */
+const QS=(function(){try{return new URLSearchParams(location.search||location.hash.replace(/^#/,""))}catch(e){return new URLSearchParams("")}})();
+const LINK_DATE=(function(){const s=QS.get("s");if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const a=s.split("-").map(Number),d=new Date(a[0],a[1]-1,a[2]);return d.getFullYear()===a[0]&&d.getMonth()===a[1]-1&&d.getDate()===a[2]&&a[0]>=2000&&a[0]<=2100?s:null})();
+const PATIENT_MODE=!!LINK_DATE&&QS.get("c")!=="1";
+
+/* ---------- value resolution: variants (selector keyed) and tiers (week keyed) ---------- */
+const sel={};
+SEL.forEach(s=>{const q=QS.get(s.id),v=load("sel-"+s.id);sel[s.id]=s.options.some(o=>o.id===q)?q:(!PATIENT_MODE&&s.options.some(o=>o.id===v)?v:s.options[0].id)});
+function pick(v,w){
+  if(v==null||typeof v!=="object")return v;
+  if(Array.isArray(v))return v.map(e=>pick(e,w));
+  if(Array.isArray(v.tiers)){let t=v.tiers[0];for(const x of v.tiers){if(w>=x[0])t=x}return pick(t.slice(1),w)}
+  for(const s of SEL){if(v[sel[s.id]]!==undefined)return pick(v[sel[s.id]],w)}
+  if(v["default"]!==undefined)return pick(v["default"],w);
+  return v;
+}
+function T(v,w){const r=pick(v,w);return Array.isArray(r)?r[r.length-1]:r}
+function lim(ph,k,w){const v=pick(ph.limits[k],w);return Array.isArray(v)?v:["c",String(v)]}
+function tierWeeks(ph){const out=[];for(const [k] of P.limitKeys){const v=ph.limits[k];if(v&&v.tiers)v.tiers.forEach(t=>{if(t[0]>ph.start)out.push({w:t[0],txt:t[3]||String(pick(t.slice(1),t[0])[1])})})}return out}
+
+/* ---------- dates ---------- */
+function parseD(s){const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today0(){const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r}
+function addMonths(d,n){const r=new Date(d);r.setMonth(r.getMonth()+n);return r}
+function diff(a,b){return Math.round((b-a)/DAY)}
+function fmt(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}
+function fmtShort(d){return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+function rel(n){return n===0?"today":n>0?"in "+n+" day"+(n===1?"":"s"):Math.abs(n)+" day"+(n===-1?"":"s")+" ago"}
+function xpos(w){w=Math.max(0,Math.min(SPAN,w));return w<=BRK?w/BRK*BRKP:BRKP+(w-BRK)/(SPAN-BRK)*(100-BRKP)}
+function phaseDate(sx,wk){return addDays(sx,Math.round(wk*7))}
+function wkOf(ph){return ph.start<0?0:ph.start}
+
+const sxEl=$("sx");
+let isExample=false;
+(function(){const saved=LINK_DATE||load("sx");if(saved){sxEl.value=saved}else{sxEl.value=iso(addDays(today0(),-Math.round((P.exampleWeek||6)*7)));isExample=true}})();
+const posts=P.phases.filter(p=>p.start>=0);
+function curPhase(w){return P.phases.find(p=>w>=p.start&&w<p.end)||(w>=SPAN?P.phases[P.phases.length-1]:null)}
+
+/* ---------- static header ---------- */
+document.title=P.title;
+$("title").textContent=P.title;
+$("subtitle").textContent=P.subtitle||"";
+$("foot").innerHTML=(P.sources&&P.sources.length?"Sources: "+P.sources.map(s=>s.url?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>'+(s.note?" ("+esc(s.note)+")":""):esc(s.title)+(s.note?" ("+esc(s.note)+")":"")).join("; ")+". ":"")+
+  "The surgery date, selections, and checkbox progress stay in this browser only. The operating surgeon's post-op orders supersede this page.";
+
+function renderSelectors(){
+  $("selectors").innerHTML=SEL.map(s=>'<div class="datebox selbox"><span class="lab">'+esc(s.label)+'</span><div class="segctl" role="group" aria-label="'+esc(s.label)+'">'+
+    s.options.map(o=>'<button type="button" data-sel="'+esc(s.id)+'" data-opt="'+esc(o.id)+'" aria-pressed="'+(sel[s.id]===o.id)+'">'+esc(o.label)+'</button>').join("")+'</div></div>').join("");
+  const bn=[];
+  SEL.forEach(s=>s.options.forEach(o=>{if(sel[s.id]===o.id&&o.banner)bn.push('<div class="banner"><b>'+esc(o.label)+':</b> '+esc(o.banner)+'</div>')}));
+  $("banners").innerHTML=bn.join("");
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-sel]");if(!b)return;
+  sel[b.dataset.sel]=b.dataset.opt;store("sel-"+b.dataset.sel,b.dataset.opt);renderAll();
+});
+
+/* ---------- clinician view ---------- */
+function renderClinician(){
+  $("example").hidden=!isExample;
+  if(!sxEl.value)return;
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w), show=cur||posts[0];
+
+  $("weekread").innerHTML=d<0?"Surgery <b>"+rel(d)+"</b>":"Post-op day <b>"+d+"</b> · week <b>"+(Math.floor(d/7)+1)+"</b>";
+
+  const th=$("todayhead"),td=$("today"),nx=$("nextup");
+  const selTxt=SEL.map(s=>s.options.find(o=>o.id===sel[s.id]).label.toLowerCase()).join(", ");
+  if(d<0&&!P.phases.some(p=>p.start<0)){th.innerHTML='<span class="ph-name">Pre-op</span><span>Limits below start on the day of surgery</span>';}
+  else{const pp=d<0?P.phases[0]:show;
+    th.innerHTML='<span class="ph-name">Phase '+esc(pp.num)+': '+esc(pp.name)+'</span><span><b>'+esc(pp.range)+'</b>'+(pp.start>=0?' · '+fmtShort(phaseDate(sx,pp.start))+' to '+(pp.end>=SPAN?"discharge":fmtShort(addDays(phaseDate(sx,pp.end),-1))):'')+(selTxt?' · '+esc(selTxt):'')+'</span>';}
+  const lp=d<0&&P.phases[0].start<0?P.phases[0]:show;
+  td.innerHTML=P.limitKeys.map(([k,l])=>{const v=lim(lp,k,ww);return '<div><div class="k">'+esc(l)+'</div><div class="v '+v[0]+'">'+esc(v[1])+'</div></div>'}).join("");
+  const nk=P.limitKeys.length;td.style.setProperty("--cols",nk<=5?nk:(nk%3===0?3:4));
+
+  // next change: next phase start or next tier inside the current phase
+  const ch=[];posts.forEach(p=>{if(p.start>w+1e-9)ch.push({w:p.start,txt:"Phase "+p.num+": "+p.name})});
+  if(cur)tierWeeks(cur).forEach(c=>{if(c.w>w+1e-9)ch.push(c)});
+  ch.sort((a,b)=>a.w-b.w);
+  if(ch.length){const dt=phaseDate(sx,ch[0].w);nx.innerHTML="Next change: <b>"+esc(ch[0].txt)+"</b> on "+fmt(dt)+" ("+rel(diff(t,dt))+")"}else nx.textContent="";
+
+  // standing precautions
+  $("standing").innerHTML=P.standingPrecautions&&P.standingPrecautions.length?'<div class="ov"><div class="t">'+esc(P.standingPrecautionsTitle||"Standing precautions")+'</div><ul>'+P.standingPrecautions.map(i=>'<li>'+esc(T(i,ww))+'</li>').join("")+'</ul></div>':"";
+
+  // lanes
+  const nowX=xpos(ww);
+  $("lanes").innerHTML=P.lanes.map(L=>'<div class="lane"><div class="ln">'+esc(L.name)+'</div><div class="bar">'+
+    L.segs.map(s=>{const a=xpos(s[0]),b=xpos(s[1]),lb=T(s[3],ww);return '<div class="seg '+s[2]+'" style="left:'+a+'%;width:'+(b-a)+'%" title="'+esc(lb)+'">'+esc(lb)+'</div>'}).join("")+
+    (d>=0?'<div class="nowline" style="left:calc('+nowX+'% - 1px)"></div>':'')+'</div></div>').join("");
+  const shift=nowX<8?"0":nowX>92?"-100%":"-50%";
+  $("nowlabel").innerHTML=d<0?"":'<span style="left:'+nowX+'%;transform:translateX('+shift+')">Today · wk '+(Math.floor(d/7)+1)+' ▾</span>';
+  const ticks=P.tickWeeks||[0,2,4,6,8,12,16,26,39,52];
+  $("ticks").innerHTML=ticks.map((k,i)=>'<span class="'+(i===ticks.length-1?"last":"")+'" style="left:'+xpos(k)+'%">'+(P.tickLabels&&P.tickLabels[String(k)]?esc(P.tickLabels[String(k)]):(i===ticks.length-1?k+" wk":k))+'</span>').join("");
+
+  // phases
+  const openSet=new Set([...document.querySelectorAll("details.ph[open]")].map(e=>e.dataset.key));
+  const first=!document.querySelector("details.ph");
+  $("phases").innerHTML=P.phases.map(p=>{
+    const isCur=p===cur&&d>=0, done=w>=p.end&&p.end<SPAN&&d>=0;
+    const chip=isCur?'<span class="chip now">Current</span>':done?'<span class="chip done">Complete</span>':(p.start>=0?'<span class="chip up">Starts '+fmtShort(phaseDate(sx,p.start))+'</span>':'<span class="chip up">Pre-op</span>');
+    const crit=p.criteria.map((c,i)=>{const id="c-"+p.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-k="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(T(c,ww))+'</label></li>'}).join("");
+    const nChecked=p.criteria.filter((c,i)=>load("c-"+p.key+"-"+i)==="1").length;
+    const lw=isCur?ww:wkOf(p);
+    const open=first?isCur:openSet.has(p.key);
+    const lm=P.limitKeys.map(([k,l])=>{const v=lim(p,k,lw);return '<div class="'+v[0]+'"><div class="k">'+esc(l)+'</div><div class="v">'+esc(v[1])+'</div></div>'}).join("");
+    const G=pick(p.groups,lw);
+    const notes=(p.notes||[]).map(n=>'<div class="ov'+(n.tone==="note"?" note":"")+'"><div class="t">'+esc(n.title)+'</div><ul>'+n.items.map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join("");
+    return '<details class="ph'+(isCur?" current":"")+'" data-key="'+esc(p.key)+'"'+(open?" open":"")+'><summary><div class="pn">'+esc(p.num)+'</div><div><div class="pt">'+esc(p.name)+'</div><div class="pw">'+esc(p.range)+(p.start>=0?' · '+fmtShort(phaseDate(sx,p.start))+(p.end<SPAN?' – '+fmtShort(addDays(phaseDate(sx,p.end),-1)):' onward'):'')+'<span class="progress" data-prog="'+esc(p.key)+'">'+nChecked+'/'+p.criteria.length+' criteria</span></div></div>'+chip+'</summary><div class="body">'+
+      (p.stage?'<p class="pw" style="margin:0 0 10px"><b>'+esc(p.stage.name)+'.</b> '+esc(p.stage.text)+'</p>':'')+
+      '<div class="limits">'+lm+'</div>'+
+      (p.focus?'<p>'+esc(T(p.focus,lw))+'</p>':'')+
+      (p.goals&&p.goals.length?'<h3>Goals</h3><ul>'+p.goals.map(g=>'<li>'+esc(T(g,lw))+'</li>').join("")+'</ul>':'')+
+      (G&&G.length?'<h3>Interventions</h3>'+G.map(g=>'<div class="grp"><b>'+esc(g[0])+'</b><ul>'+g[1].map(i=>'<li>'+esc(T(i,lw))+'</li>').join("")+'</ul></div>').join(""):'')+
+      notes+
+      (p.callout?'<p class="cal">'+esc(p.callout)+'</p>':'')+
+      '<h3>'+esc(p.gateTitle||"Criteria to progress")+'</h3><ul class="crit">'+crit+'</ul></div></details>'}).join("");
+
+  // key dates
+  const kd=P.keyDates||[];
+  $("keydates-wrap").hidden=!kd.length;
+  $("dates").innerHTML=kd.map(r=>{const dt=r.months!=null?addMonths(sx,r.months):phaseDate(sx,r.week);const n=diff(t,dt);const cls=n<0?"past":n<=14?"soon":"";
+    return '<tr class="'+cls+'"><td>'+esc(r.label)+'</td><td>'+esc(r.when)+'</td><td class="d">'+fmt(dt)+'</td><td class="s d">'+(n<0?"Done":rel(n))+'</td></tr>'}).join("");
+
+  // extras, flags, review
+  $("extras").innerHTML=P.extras&&P.extras.length?'<h2>'+esc(P.extrasTitle||"Testing, manual therapy, discharge")+'</h2><div class="cards">'+P.extras.map(c=>'<div><h3>'+esc(c.title)+'</h3><ul>'+c.items.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>').join("")+'</div>':"";
+  const fl=P.callSurgeon||[];$("flags").hidden=!fl.length;$("flagsList").innerHTML=fl.map(i=>'<li>'+esc(i)+'</li>').join("");
+  const rv=P.reviewFlags||[];$("review").hidden=!rv.length;$("reviewList").innerHTML=rv.map(r=>'<li><b>'+esc(r.item)+'</b>'+(r.why?' — '+esc(r.why):'')+'</li>').join("");
+}
+
+/* ---------- patient snapshot ---------- */
+function renderSnapshot(){
+  const el=$("snapshot");
+  if(!sxEl.value){el.innerHTML='<div class="sn-card"><p>Enter the date of surgery on the clinician page first.</p><button type="button" id="closeSnap">Back to protocol</button></div>';return}
+  const sx=parseD(sxEl.value),t=today0(),d=diff(sx,t),w=d/7,ww=Math.max(0,w);
+  const cur=curPhase(w);
+  const ph=d<0?(P.phases.find(p=>p.start<0)||posts[0]):(cur||posts[0]);
+  const pt=ph.patient||{};
+  const idx=posts.indexOf(ph), next=d<0?(P.phases.find(p=>p.start<0)?posts[0]:posts[1]):posts[idx+1];
+  const steps=posts.map((p,i)=>'<div class="s '+(d>=0&&p===ph?"cur":(d>=0&&w>=p.end?"done":""))+'"><div class="b"></div><div class="l">'+esc(p.patient&&p.patient.short||p.name)+'</div></div>').join("");
+  const nums=(pt.numbers||P.limitKeys.map(([k,l])=>[l,lim(ph,k,ww)[1]])).map(n=>'<div><div class="k">'+esc(n[0])+'</div><div class="v">'+esc(T(n[1],ww))+'</div></div>').join("");
+  const sPick=a=>(a||[]).map(i=>T(i,ww));
+  const ul=a=>'<ul>'+sPick(a).map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul>';
+  const goals=sPick(pt.goals).map((g,i)=>{const id="sg-"+ph.key+"-"+i;return '<li><input type="checkbox" id="'+id+'" data-sg="'+id+'"'+(load(id)==="1"?" checked":"")+'><label for="'+id+'">'+esc(g)+'</label></li>'}).join("");
+  const upcoming=(P.keyDates||[]).filter(k=>k.patient).map(k=>({k,dt:k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week)})).filter(x=>diff(t,x.dt)>=0).sort((a,b)=>a.dt-b.dt)[0];
+  const nextHtml=(next||pt.next)?'<div class="sn-box next"><h3>Coming up next</h3>'+(next?'<p style="margin:0 0 4px"><b>'+esc(next.patient&&next.patient.short||next.name)+'</b> · expected around '+fmt(phaseDate(sx,next.start))+'</p>':'')+(pt.next?'<p style="margin:0;font-size:14.5px">'+esc(T(pt.next,ww))+'</p>':'')+(upcoming&&(!next||upcoming.k.week!==next.start)?'<p style="margin:6px 0 0;font-size:13.5px;color:var(--muted)">Also: '+esc(upcoming.k.patient===true?upcoming.k.label:upcoming.k.patient)+' · '+fmt(upcoming.dt)+'</p>':'')+'</div>':'';
+  const call=(P.patient&&P.patient.callIf)||P.callSurgeon||[];
+  const sv=k=>esc(load("sn-"+k)||"");
+  el.innerHTML=
+   '<div class="noprint modebar" style="margin:0 0 14px;align-items:center"><button type="button" class="primary" id="icsBtn">Add milestones to my calendar</button>'+(PATIENT_MODE?'':'<button type="button" id="closeSnap">← Back to protocol</button>')+(P.allowPrint?'<button type="button" id="printSnap">Print or save as PDF</button>':'')+(PATIENT_MODE?'':'<span class="pw">Need a PDF copy for the patient? Ask Claude for the snapshot and give it the surgery date.</span>')+'</div>'+
+   '<div class="sn-card">'+
+    '<div class="sn-top"><div><div class="kicker">Your recovery snapshot</div><h1>'+esc((P.patient&&P.patient.title)||P.title)+'</h1></div>'+
+    '<div class="sn-meta">As of <b>'+fmt(t)+'</b><br>'+(d<0?'Surgery '+rel(d):'Surgery '+fmt(sx)+' · <b>week '+(Math.floor(d/7)+1)+'</b>')+'</div></div>'+
+    '<div class="sn-name"><label for="sn-name">Name</label><input type="text" id="sn-name" data-sn="name" value="'+sv("name")+'" placeholder="Optional. Stays on this device"></div>'+
+    '<div class="steps" aria-label="Recovery phases">'+steps+'</div>'+
+    '<div class="sn-where"><div class="ph">'+esc(d<0?"Getting ready for surgery":(ph.patient&&ph.patient.title)||ph.name)+'</div><div class="when">'+esc(ph.range)+'</div><p>'+esc(T(pt.summary,ww)||"")+'</p></div>'+
+    '<div class="sn-nums">'+nums+'</div>'+
+    '<div class="sn-two"><div class="sn-box do"><h3>Keep doing</h3>'+ul(pt.do)+'</div><div class="sn-box avoid"><h3>Please avoid for now</h3>'+ul(pt.avoid)+'</div></div>'+
+    '<div class="sn-two"><div class="sn-box goals"><h3>What we are working toward</h3><ul class="sn-goals">'+goals+'</ul></div>'+nextHtml+'</div>'+
+    (call.length?'<div class="sn-call"><h3>Call your surgeon or therapist if</h3><ul>'+call.map(i=>'<li>'+esc(i)+'</li>').join("")+'</ul></div>':'')+
+    '<div class="sn-foot"><div><label for="sn-th">Your therapist</label><input type="text" id="sn-th" data-sn="th" value="'+sv("th")+'"></div><div><label for="sn-ph">Clinic phone</label><input type="text" id="sn-ph" data-sn="ph" value="'+sv("ph")+'"></div><div><label for="sn-nv">Next visit</label><input type="text" id="sn-nv" data-sn="nv" value="'+sv("nv")+'"></div></div>'+
+    '<p class="sn-disc">'+esc((P.patient&&P.patient.disclaimer)||"This is a general guide to where you are in your recovery. Your surgeon and therapist may adjust it for you. Their instructions come first.")+'</p>'+
+   '</div>';
+}
+document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.sn;if(k)store("sn-"+k,e.target.value||null)});
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.sg;if(k)store(k,e.target.checked?"1":null)});
+
+/* ---------- mode + wiring ---------- */
+function setMode(snap){document.body.classList.toggle("snap",snap);$("snapshot").hidden=!snap;$("clinician").hidden=snap;if(snap){renderSnapshot();window.scrollTo(0,0)}}
+function doPrint(){try{window.print()}catch(e){}}
+document.addEventListener("click",e=>{
+  const id=e.target.id;
+  if(id==="openSnap")setMode(true);
+  else if(id==="closeSnap")setMode(false);
+  else if(id==="printSnap"||id==="printClin")doPrint();
+});
+sxEl.addEventListener("change",()=>{if(sxEl.value){store("sx",sxEl.value);isExample=false}else{store("sx",null)}renderAll()});
+
+/* ---------- patient link (clinician side) ---------- */
+function patientLink(){
+  if(!sxEl.value||isExample)return"";
+  const q=new URLSearchParams();q.set("s",sxEl.value);SEL.forEach(s=>q.set(s.id,sel[s.id]));
+  return location.origin+location.pathname+"?"+q.toString();
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="linkBtn")return;
+  const box=$("linkBox"),url=patientLink();
+  if(!url){box.hidden=false;box.innerHTML='<span class="pw">Enter the surgery date first.</span>';return}
+  box.hidden=false;
+  box.innerHTML='<label for="linkOut" style="font-size:13px;color:var(--muted)">Patient link (surgery date only, no name)</label><input type="text" id="linkOut" readonly value="'+esc(url)+'" style="width:100%">';
+  const o=$("linkOut");o.focus();o.select();
+  try{navigator.clipboard.writeText(url)}catch(err){}
+});
+
+/* ---------- calendar export (.ics, all-day events, no server) ---------- */
+function icsEscape(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n")}
+function icsDate(d){return d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")}
+function buildICS(){
+  const sx=parseD(sxEl.value),t=today0(),ev=[];
+  posts.forEach(p=>{if(p.start>0){const dt=phaseDate(sx,p.start);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery: "+((p.patient&&p.patient.short)||p.name),desc:(p.patient&&T(p.patient.summary,p.start))||""})}});
+  (P.keyDates||[]).filter(k=>k.patient).forEach(k=>{const dt=k.months!=null?addMonths(sx,k.months):phaseDate(sx,k.week);if(diff(t,dt)>=0)ev.push({dt,title:"Recovery milestone: "+(k.patient===true?k.label:k.patient),desc:"Target date. It depends on meeting your goals, so check with your therapist."})});
+  const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Rehab protocol tracker//EN","CALSCALE:GREGORIAN"];
+  ev.forEach((x,i)=>{const end=addDays(x.dt,1);lines.push("BEGIN:VEVENT","UID:"+(P.id||"protocol")+"-"+icsDate(sx)+"-"+i+"@rehab-tracker","DTSTAMP:"+icsDate(t)+"T000000Z","DTSTART;VALUE=DATE:"+icsDate(x.dt),"DTEND;VALUE=DATE:"+icsDate(end),"SUMMARY:"+icsEscape(x.title),"DESCRIPTION:"+icsEscape(x.desc),"TRANSP:TRANSPARENT","END:VEVENT")});
+  lines.push("END:VCALENDAR");
+  return{text:lines.join("\r\n"),count:ev.length};
+}
+document.addEventListener("click",e=>{
+  if(e.target.id!=="icsBtn")return;
+  const r=buildICS();
+  if(!r.count){e.target.textContent="No upcoming milestones left";return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([r.text],{type:"text/calendar"}));a.download="recovery-milestones.ics";document.body.appendChild(a);a.click();a.remove();e.target.textContent="Calendar file ready ("+r.count+" events)"}catch(err){e.target.textContent="Download isn't available here"}
+});
+$("phases").addEventListener("change",e=>{
+  const k=e.target.dataset&&e.target.dataset.k;if(!k)return;
+  store(k,e.target.checked?"1":null);
+  const key=k.split("-")[1],p=P.phases.find(q=>q.key===key);
+  const n=p.criteria.filter((c,i)=>load("c-"+key+"-"+i)==="1").length;
+  const el=document.querySelector('[data-prog="'+key+'"]');if(el)el.textContent=n+"/"+p.criteria.length+" criteria";
+});
+$("expand").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true);
+$("collapse").onclick=()=>document.querySelectorAll("details.ph").forEach(d=>d.open=false);
+$("reset").onclick=()=>{P.phases.forEach(p=>p.criteria.forEach((c,i)=>store("c-"+p.key+"-"+i,null)));renderAll()};
+window.addEventListener("beforeprint",()=>document.querySelectorAll("details.ph").forEach(d=>d.open=true));
+
+$("printClin").hidden=!P.allowPrint;
+function renderAll(){renderSelectors();renderClinician();if(document.body.classList.contains("snap"))renderSnapshot()}
+renderAll();
+if(PATIENT_MODE){setMode(true);window.scrollTo(0,0)}
+window.__protocolReady=true;
+})();
+</script>
+</body>
+</html>
